@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import org.apache.commons.math3.distribution.RealDistribution;
-
 
 
 public class HMM {
@@ -20,17 +18,20 @@ public class HMM {
 		String piValue="[";
 		String aValue="[";
 		for(BigDecimal x:pi)
-			piValue+=(x.round(MathContext.DECIMAL32).doubleValue()+",");
+			piValue+=(x.doubleValue()+",");
 		
 		for(int x =0;x<numStates;x++)
 			for(int y=0;y<numStates;y++)
-			aValue+=(a[x][y].round(MathContext.DECIMAL32).doubleValue()+",");
+			aValue+=(a[x][y].doubleValue()+",");
 		
 		return "HMM [a=" + aValue+"]" + ", pi=" +piValue+"]"
 				+  ", numStates=" + numStates + "]";
 	}
 	private BigDecimal a[][];
 	private BigDecimal pi[];
+	private ArrayList<HashMap<Object,BigDecimal>> epsilon;
+	private int numStates;
+	private int numEmmison;
 	/**
 	 * @return the numEmmison
 	 */
@@ -43,9 +44,7 @@ public class HMM {
 	public void setNumEmmison(int numEmmison) {
 		this.numEmmison = numEmmison;
 	}
-	private ArrayList<HashMap<Object,BigDecimal>> epsilon;
-	private int numStates;
-	private int numEmmison;
+	
 	public HMM(BigDecimal[][] a, BigDecimal[] pi,ArrayList<HashMap<Object,BigDecimal>> epsilon) {
 		super();
 		this.a = a;

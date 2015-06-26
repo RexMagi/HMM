@@ -2,6 +2,7 @@ package marcovModel;
 
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.ArrayList;
 
 
@@ -19,7 +20,7 @@ public class BaumWelch<O> extends ForwardBackward<O> {
 			temp2=temp2.add(gamma(i,x));
 			
 		}
-		return temp.divide(temp2,BigDecimal.ROUND_HALF_EVEN);
+		return temp.divide(temp2,MathContext.DECIMAL32);
 	}
 	private BigDecimal updateB(int i,int t ){
 		BigDecimal temp=new BigDecimal(0),temp2=new BigDecimal(0);;
@@ -28,7 +29,7 @@ public class BaumWelch<O> extends ForwardBackward<O> {
 				temp=temp.add(gamma(i,x));
 			temp2=temp2.add(gamma(i,x));
 		}
-		return temp.divide(temp2,BigDecimal.ROUND_HALF_EVEN);
+		return temp.divide(temp2,MathContext.DECIMAL32);
 	}
 	public void updateDiscrete(){
 		BigDecimal[] tpi=new BigDecimal[Model.getNumStates()];
@@ -57,6 +58,7 @@ public class BaumWelch<O> extends ForwardBackward<O> {
 		for(int x=0;x<Model.getNumStates();x++)
 			for(int y=0;y<Model.getNumStates();y++){
 				ttrans[x][y]=updateA(x,y);
+				
 			}
 		//fuck if i know how to do this
 		for(int x=0;x<Model.getNumStates();x++)
@@ -75,6 +77,7 @@ public class BaumWelch<O> extends ForwardBackward<O> {
 				this.trainingSet=new ArrayList(Data.subList(x-(Data.size()+1)/10,x));
 			else
 				this.trainingSet=new ArrayList(Data.subList(x, x+(Data.size()+1)/10));
+			
 			alpha=new BigDecimal[Model.getNumStates()][trainingSet.size()];
 			beta=new BigDecimal[Model.getNumStates()][trainingSet.size()];	
 			for(int i =0;i<Model.getNumStates();i++)
@@ -84,6 +87,7 @@ public class BaumWelch<O> extends ForwardBackward<O> {
 				}
 
 			forward();
+			
 			back();
 			updateDiscrete();
 			System.out.println(Model);

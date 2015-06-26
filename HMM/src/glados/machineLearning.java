@@ -4,10 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
-import org.apache.commons.math3.distribution.EnumeratedRealDistribution;
-import org.apache.commons.math3.distribution.MixtureMultivariateNormalDistribution;
-import org.apache.commons.math3.distribution.RealDistribution;
-import org.apache.commons.math3.stat.descriptive.moment.SemiVariance.Direction;
 
 import marcovModel.*;
 
@@ -22,6 +18,7 @@ public class machineLearning {
     
 	public static void main(String[] args) {
 		Scanner eyes=new Scanner(System.in);
+		
 		int loop;
 		System.out.print("Enter number of packets to read in: ");
 		loop=eyes.nextInt();
@@ -29,9 +26,9 @@ public class machineLearning {
 		orgTypes(read.getPacketData());
 		ArrayList<HMM> Bot=new ArrayList<HMM>();
 		BigDecimal [][] a= {
-				{new BigDecimal(.8),new BigDecimal(.15),new BigDecimal(.1)},
-				{new BigDecimal(.15),new BigDecimal(.75),new BigDecimal(.2)},
-				{new BigDecimal(.05),new BigDecimal(.10),new BigDecimal(.7)}		
+				{new BigDecimal(.8),new BigDecimal(.15),new BigDecimal(.05)},
+				{new BigDecimal(.15),new BigDecimal(.75),new BigDecimal(.1)},
+				{new BigDecimal(.1),new BigDecimal(.2),new BigDecimal(.7)}		
 		};
 		BigDecimal [] pi={new BigDecimal(.7),new BigDecimal(.2),new BigDecimal(.1)
 		};
@@ -61,6 +58,10 @@ public class machineLearning {
 		System.out.println("HMM2:");
 		System.out.println(Bot.get(1));
 		learn2.learn();
+		
+		
+		
+		
 		
 		eyes.close();
 	}
