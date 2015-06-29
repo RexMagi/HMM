@@ -19,13 +19,13 @@ public class HMM {
 		String aValue="[";
 		for(BigDecimal x:pi)
 			piValue+=(x.doubleValue()+",");
-		
+
 		for(int x =0;x<numStates;x++)
 			for(int y=0;y<numStates;y++)
-			aValue+=(a[x][y].doubleValue()+",");
-		
+				aValue+=(a[x][y].doubleValue()+",");
+
 		return "HMM [a=" + aValue+"]" + ", pi=" +piValue+"]"
-				+  ", numStates=" + numStates + "]";
+		+  ", numStates=" + numStates + "]";
 	}
 	private BigDecimal a[][];
 	private BigDecimal pi[];
@@ -44,7 +44,7 @@ public class HMM {
 	public void setNumEmmison(int numEmmison) {
 		this.numEmmison = numEmmison;
 	}
-	
+
 	public HMM(BigDecimal[][] a, BigDecimal[] pi,ArrayList<HashMap<Object,BigDecimal>> epsilon) {
 		super();
 		this.a = a;
@@ -83,9 +83,9 @@ public class HMM {
 	public BigDecimal getEpsilon(int y, Object x) {
 		return epsilon.get(y).get(x);
 	}
-		public HashMap<Object, BigDecimal> getEpsilon(int y) {
-			return epsilon.get(y);
-		}
+	public HashMap<Object, BigDecimal> getEpsilon(int y) {
+		return epsilon.get(y);
+	}
 	/**
 	 * @param epslon the epsilon to set
 	 */
@@ -105,18 +105,25 @@ public class HMM {
 		this.numStates = numStates;
 	}
 	public void updateEpsilon(){
-		
-		
-		
-		
+
+
+
+
 	}
 	public void updateEpsilon(int i,Object Y,BigDecimal x){
-		
 		epsilon.get(i).remove(Y);
 		epsilon.get(i).put(Y, x);
-		
-		
-		
+	}
+	public void normalize(BigDecimal[] sumA, BigDecimal[] sumB) {
+		for(int i=0;i<numStates;i++)
+			for(int j=0;j<numStates;j++){
+				a[i][j]=a[i][j].divide(sumA[i],MathContext.DECIMAL32);
+			}
+		for(int i=0;i<numStates;i++)
+			for(int t=0;t<numEmmison;t++){
+				epsilon.get(i).put(t+1, epsilon.get(i).remove(t+1).divide(sumB[i],MathContext.DECIMAL32));
+				
+			}
 	}
 
 
