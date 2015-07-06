@@ -95,6 +95,8 @@ public class machineLearning {
 						(int) arr.get(i).get(3)));
 				portSrcArr.add(new Observation (
 						(int) arr.get(i).get(4)));
+				System.out.println(portSrcArr);
+				System.out.println(portDstArr);
 			}catch(IndexOutOfBoundsException e){
 				arr.remove(i);
 			}
