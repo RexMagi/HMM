@@ -1,5 +1,7 @@
 package glados;
 import java.util.ArrayList;
+import java.util.Date;
+
 import org.jnetpcap.Pcap;
 import org.jnetpcap.packet.JPacket;
 import org.jnetpcap.packet.JPacketHandler;
@@ -43,6 +45,7 @@ public class PcapReader implements JPacketHandler<StringBuilder>{
 		 * then get that header (peer header definition instance with memory in 
 		 * the packet) in 2 separate steps. 
 		 */  
+		
 		if (packet.hasHeader(Ip4.ID)) {  
 
 			/* 
@@ -94,8 +97,9 @@ public class PcapReader implements JPacketHandler<StringBuilder>{
 			pckt.add(new Integer(tcp.destination()));  
 			pckt.add(new Integer(tcp.source()));
 		}   
-		packetData.add(pckt);
 		
+		pckt.add(new Date(packet.getCaptureHeader().timestampInMillis()));
+		packetData.add(pckt);
 	}
 	/**
 	  @return the fileName

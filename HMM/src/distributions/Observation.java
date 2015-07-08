@@ -1,5 +1,7 @@
 package distributions;
 
+
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 
@@ -61,6 +63,10 @@ public Observation(String x) {
 public Observation(int i) {
 	data = new ArrayList<Double>();
 	data.add(new Double(i));
+}
+
+public Observation(java.util.Date date) {
+	// TODO Auto-generated constructor stub
 }
 
 /**
