@@ -25,8 +25,8 @@ public class ForwardBackward  {
 
 	}
 	public void forward(){
-		sum= new BigDecimal[trainingSet.size()];
-		for(int x=0; x<trainingSet.size();x++)
+		sum = new BigDecimal[trainingSet.size()];
+		for(int x = 0; x < trainingSet.size(); x++)
 			sum[x] = new BigDecimal(0);
 		//loops through all states and caches alpha values
 		for(int i=0;i<Model.getNumStates();i++)

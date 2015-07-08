@@ -6,7 +6,7 @@ public abstract class Function {
 
 	BigDecimal mu;
 	BigDecimal sigma;
-	public abstract BigDecimal pdf(BigDecimal x);
+	public abstract BigDecimal eta(Observation x);
 	public Function(BigDecimal mu, BigDecimal sigma) {
 		super();
 		this.mu = mu;

@@ -19,6 +19,7 @@ public class Gaussian extends Function {
         return phi((x - mu) / sigma) / sigma;
     }
 
+    
     // return Phi(z) = standard Gaussian cdf using Taylor approximation
     public static double Phi(double z) {
         if (z < -8.0) return 0.0;
@@ -50,7 +51,7 @@ public class Gaussian extends Function {
     }
 
 	@Override
-	public BigDecimal pdf(BigDecimal x) {
+	public BigDecimal eta(Observation x) {
 		// TODO Auto-generated method stub
 		return null;
 	}
