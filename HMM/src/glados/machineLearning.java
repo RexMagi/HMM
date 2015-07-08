@@ -112,6 +112,7 @@ public class machineLearning {
 						(int) arr.get(i).get(3)));
 				portSrcArr.add(new Observation (
 						(int) arr.get(i).get(4)));
+<<<<<<< HEAD
 				timeStamp.add(new Observation (
 						(Date) arr.get(i).get(5)));
 
@@ -133,6 +134,11 @@ public class machineLearning {
 				write.newLine();
 
 			}catch(IndexOutOfBoundsException | IOException e){
+=======
+				System.out.println(portSrcArr);
+				System.out.println(portDstArr);
+			}catch(IndexOutOfBoundsException e){
+>>>>>>> origin/master
 				arr.remove(i);
 			}
 		}

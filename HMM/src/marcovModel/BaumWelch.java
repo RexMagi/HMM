@@ -113,6 +113,9 @@ public class BaumWelch extends ForwardBackward {
 		Model.setA(ttrans);
 		Model.normalize(sumA,sumB);
 	}
+	
+	// main difference from updateDiscrete is the call to MixtureDistribution.
+	// check differing gamma() calls, this one is of 2 args, might have to be 3.
 	public void updateContinuous(){
 		BigDecimal[] tpi=new BigDecimal[Model.getNumStates()];
 		BigDecimal ttrans[][]=new BigDecimal[Model.getNumStates()][Model.getNumStates()];
@@ -140,6 +143,7 @@ public class BaumWelch extends ForwardBackward {
 		Model.normalizeA(sumA);
 
 	}
+	// make conditional for learn() for udateDiscrete() vs updateContinuous().
 	public void learn(){
 		for(int x=0;x<=Data.size();x+=(Data.size()+1)/10){
 			if(x+Data.size()/10>=Data.size())
