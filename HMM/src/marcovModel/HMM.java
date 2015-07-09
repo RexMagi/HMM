@@ -56,8 +56,8 @@ public class HMM {
 		this.b = epsilon;
 		this.numStates=pi.length;
 		if(epsilon.get(0) instanceof EnumeratedDistribution)
-			this.numEmision=((EnumeratedDistribution)epsilon.get(0)).getP().size();
-		this.numMixtureComponents=b.get(0).getNumMixtures();
+			this.numEmision = ((EnumeratedDistribution)epsilon.get(0)).getP().size();
+		this.numMixtureComponents = b.get(0).getNumMixtures();
 	}
 	/**
 	 * @return the a
@@ -78,6 +78,7 @@ public class HMM {
 		return pi[x];
 	}
 	public BigDecimal pdf(int x,Observation y) {
+		
 		return b.get(x).pdf(y);
 	}
 	public BigDecimal pdf(int i,int m,Observation y) {

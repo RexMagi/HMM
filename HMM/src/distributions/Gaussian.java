@@ -6,16 +6,19 @@ public class Gaussian extends Function {
 
 	 public Gaussian(BigDecimal mu, BigDecimal sigma) {
 		super(mu, sigma);
-		// TODO Auto-generated constructor stub
+		
 	}
 
 	// return phi(x) = standard Gaussian pdf
     public static double phi(double x) {
-        return Math.exp(-x*x / 2) / Math.sqrt(2 * Math.PI);
+    //	System.out.println(x);
+      // System.out.println(Math.exp(-x*x / 2) / Math.sqrt(2 * Math.PI));
+    	return Math.exp(-x*x / 2) / Math.sqrt(2 * Math.PI);
     }
 
     // return phi(x, mu, signma) = Gaussian pdf with mean mu and stddev sigma
     public static double phi(double x, double mu, double sigma) {
+    	System.out.println(x);
         return phi((x - mu) / sigma) / sigma;
     }
 
@@ -52,8 +55,8 @@ public class Gaussian extends Function {
 
 	@Override
 	public BigDecimal eta(Observation x) {
-		// TODO Auto-generated method stub
-		return null;
+		 System.out.println(phi(x.getData(0),mu.doubleValue(),sigma.doubleValue()));
+		return BigDecimal.valueOf(phi(x.getData(0),mu.doubleValue(),sigma.doubleValue()));
 	}
 
 

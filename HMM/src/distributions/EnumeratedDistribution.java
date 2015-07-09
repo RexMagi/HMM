@@ -15,7 +15,6 @@ public class EnumeratedDistribution extends Distribution {
 
 	@Override
 	public BigDecimal pdf(Observation x) {
-		// TODO Auto-generated method stub
 		return p.get(x);
 	}
 	public void update(Observation Y,BigDecimal x){
@@ -45,7 +44,6 @@ public class EnumeratedDistribution extends Distribution {
 
 	@Override
 	public BigDecimal pdf(Observation x, int m) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 	

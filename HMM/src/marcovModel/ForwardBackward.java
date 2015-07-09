@@ -29,30 +29,33 @@ public class ForwardBackward  {
 		for(int x = 0; x < trainingSet.size(); x++)
 			sum[x] = new BigDecimal(0);
 		//loops through all states and caches alpha values
-		for(int i=0;i<Model.getNumStates();i++)
-			for(int t=0;t<trainingSet.size();t++){
-				if(t==0){
+		for(int i = 0;i < Model.getNumStates();i++)
+			for(int t = 0;t < trainingSet.size();t++){
+				if(t == 0){
 					//sets alpha at time 1 to pi for that state times the propability of
 					//y1 given state i
-					alpha[i][t]=Model.getPi(i).multiply
+					alpha[i][t] = Model.getPi(i).multiply
 							(Model.pdf(i,trainingSet.get(t)));
 				}else {	
+					
 					BigDecimal temp = new BigDecimal(0.);
 					for(int j = 0;j<Model.getNumStates();j++){
-						temp=temp.add(alpha[j][t-1].
+						temp = temp.add(alpha[j][t-1].
 								multiply(Model.getA(j,i)));
 					}
 					//sets alpha for state i at time x to  emmison for state i 
 					//for observation x times the sum of the previous alpha in all states times the 
 					//probibility all preveous states leads to the current state
-					alpha[i][t]=Model.pdf(i,trainingSet.get(t)).multiply(
+					alpha[i][t] = Model.pdf(i,trainingSet.get(t)).multiply(
 							temp);
 				}
-				sum[t]=sum[t].add(alpha[i][t]);				
+				System.err.println(trainingSet.get(t));
+				sum[t] = sum[t].add(alpha[i][t]);				
 			} 
-		for(int i=0;i<Model.getNumStates();i++){
-			for(int t=0;t<trainingSet.size();t++){
-				alpha[i][t]=alpha[i][t].divide(sum[t],MathContext.DECIMAL32);
+		for(int i = 0; i < Model.getNumStates();i++){
+			for(int t = 0; t < trainingSet.size();t++){
+				
+				alpha[i][t] = alpha[i][t].divide(sum[t],MathContext.DECIMAL32);
 			}
 		}
 	}
