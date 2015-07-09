@@ -14,17 +14,17 @@ public class EnumeratedDistribution extends Distribution {
 	}
 
 	@Override
-	public BigDecimal pdf(Observation x) {
+	public double pdf(Observation x) {
 		return p.get(x);
 	}
 	public void update(Observation Y,BigDecimal x){
 		p.remove(Y);
 		p.put(Y, x);
 	}
-	public void Normilize(BigDecimal sumB){
+	public void Normalize(double sumB){
 		HashMap<Observation,BigDecimal> p = new HashMap<Observation,BigDecimal>() ;
 		for(Observation x:this.p.keySet())
-		p.put(x, this.p.get(x).divide(sumB,MathContext.DECIMAL32));
+		p.put(x, (this.p.get(x))/(sumB));
 		this.p = p;
 	}
 

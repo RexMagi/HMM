@@ -1,7 +1,6 @@
 package marcovModel;
 
 
-import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,8 +13,8 @@ import distributions.Observation;
 
 
 public class HMM {
-	private BigDecimal a[][];
-	private BigDecimal pi[];
+	private double a[][];
+	private double pi[];
 	private ArrayList<Distribution> b;
 	/**
 	 * @return the b
@@ -39,17 +38,17 @@ public class HMM {
 	public String toString() {
 		String piValue="[";
 		String aValue="[";
-		for(BigDecimal x:pi)
-			piValue+=(x.doubleValue()+",");
+		for(double x:pi)
+			piValue+=(x + ",");
 
-		for(int x =0;x<numStates;x++)
-			for(int y=0;y<numStates;y++)
-				aValue+=(a[x][y].doubleValue()+",");
+		for(int x = 0; x < numStates; x++)
+			for(int y = 0; y < numStates;y++)
+				aValue+=(a[x][y] + ",");
 
 		return "HMM [a=" + aValue+"]" + ", pi=" +piValue+"]"
 		+  ", numStates=" + numStates + "]";
 	}
-	public HMM(BigDecimal[][] a, BigDecimal[] pi
+	public HMM(double[][] a, double[] pi
 			,ArrayList<Distribution> epsilon) {
 		this.a = a;
 		this.pi = pi;
@@ -62,33 +61,33 @@ public class HMM {
 	/**
 	 * @return the a
 	 */
-	public BigDecimal getA(int x, int y) {
+	public double getA(int x, int y) {
 		return a[x][y];
 	}
 	/**
 	 * @param a the a to set
 	 */
-	public void setA(BigDecimal[][] a) {
+	public void setA(double[][] a) {
 		this.a = a;
 	}
 	/**
 	 * @return the pi
 	 */
-	public BigDecimal getPi(int x) {
+	public double getPi(int x) {
 		return pi[x];
 	}
-	public BigDecimal pdf(int x,Observation y) {
+	public double pdf(int x,Observation y) {
 		
 		return b.get(x).pdf(y);
 	}
-	public BigDecimal pdf(int i,int m,Observation y) {
+	public double pdf(int i,int m,Observation y) {
 		return b.get(i).pdf(y,m);
 	}
 	/**
-	 * @param pi the pi to set
+	 * @param tpi the pi to set
 	 */
-	public void setPi(BigDecimal[] pi) {
-		this.pi = pi;
+	public void setPi(double[] tpi) {
+		this.pi = tpi;
 	}
 	/**
 	 * @return the numStates
@@ -102,10 +101,10 @@ public class HMM {
 	public void setNumStates(int numStates) {
 		this.numStates = numStates;
 	}
-	public void normalizeA(BigDecimal[] sumA) {
+	public void normalizeA(double[] sumA) {
 		for(int i=0;i<numStates;i++)
 			for(int j=0;j<numStates;j++){
-				a[i][j]=a[i][j].divide(sumA[i],MathContext.DECIMAL32);
+				a[i][j]=a[i][j] / (sumA[i]);
 			}
 	}
 	public int getNumMixtureComponents() {
@@ -114,15 +113,15 @@ public class HMM {
 	public void setNumMixtureComponents(int numMixtureComponents) {
 		this.numMixtureComponents = numMixtureComponents;
 	}
-	public void normalize(BigDecimal[] sumA, BigDecimal[] sumB) {
-		for(int i=0;i<numStates;i++)
-			for(int j=0;j<numStates;j++){
-				a[i][j]=a[i][j].divide(sumA[i],MathContext.DECIMAL32);
+	public void normalize(double[] sumA, double[] sumB) {
+		for(int i = 0; i < numStates; i++)
+			for(int j = 0; j < numStates; j++){
+				a[i][j] = a[i][j] / (sumA[i]);
 			}
-		for(int i=0;i<numStates;i++)
-			for(Distribution x:b){
+		for(int i = 0; i < numStates; i++)
+			for(Distribution x : b){
 				EnumeratedDistribution y = ((EnumeratedDistribution)x);
-				y.Normilize(sumB[i]);
+				y.Normalize(sumB[i]);
 			}	
 	}
 
