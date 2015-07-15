@@ -2,11 +2,19 @@ package distributions;
 
 
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 
 public class Observation {
-/* (non-Javadoc)
+	/* 
+	 * the symbols used to describe the emission probabilities stored as doubles to maintain  
+	 * generality with continuous pdf's
+	 */
+	@Override
+	public String toString() {
+		return "Observation [data=" + data + "]";
+	}
+
+	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
@@ -42,48 +50,47 @@ public class Observation {
 		return true;
 	}
 
-ArrayList<Double> data;
+	ArrayList<Double> data;//an array list  of symbols that describe a single observation 
 
-public Observation(ArrayList<Double> data) {	
-	this.data = data;
-}
-
-public Observation(String x) {
-	data = new ArrayList<Double>();
-	String temp = "";
-	while(x.indexOf('.')!=-1){
-	temp+=x.substring(0,x.indexOf('.'));	
-	x=x.substring(x.indexOf('.')+1);	
-		
+	public Observation(ArrayList<Double> data) {	
+		this.data = data;
 	}
-	temp+=x;
-	data.add(new Double(Double.valueOf("."+temp)));
-}
 
-public Observation(int i) {
-	data = new ArrayList<Double>();
-	data.add(new Double(i));
-}
+	public Observation(char x) {
+		if(data == null)
+			data = new ArrayList<Double>();
+		data.add(new Double((int)x));
+	}
 
-public Observation(java.util.Date date) {
-	// TODO Auto-generated constructor stub
-}
+	public Observation(int i) {
+		if(data == null)
+			data = new ArrayList<Double>();
+		data.add(new Double(i));
+	}
 
-/**
- * @return the data
- */
-public ArrayList<Double> getData() {
-	return data;
-}
-public Double getData(int x) {
-	return data.get(x);
-}
+	public Observation(java.util.Date date) {
+		// TODO Auto-generated constructor stub
+	}
 
-/**
- * @param data the data to set
- */
-public void setData(ArrayList<Double> data) {
-	this.data = data;
-}
+	/**
+	 * @return the data
+	 */
+	public ArrayList<Double> getData() {
+		return data;
+	}
+	/**
+	 * @return the symbol at a specific index 
+	 * 
+	 * */
+	public Double getData(int x) {
+		return data.get(x);
+	}
+
+	/**
+	 * @param data the data to set
+	 */
+	public void setData(ArrayList<Double> data) {
+		this.data = data;
+	}
 
 }

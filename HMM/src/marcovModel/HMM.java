@@ -1,19 +1,22 @@
 package marcovModel;
 
 
+
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 
 import distributions.Distribution;
-import distributions.EnumeratedDistribution;
+import distributions.CategoricalDistribution;
 import distributions.Observation;
 
 
 
-public class HMM {
+public class HMM implements java.io.Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2813504040057587070L;
 	private BigDecimal a[][];
 	private BigDecimal pi[];
 	private ArrayList<Distribution> b;
@@ -46,8 +49,9 @@ public class HMM {
 			for(int y=0;y<numStates;y++)
 				aValue+=(a[x][y].doubleValue()+",");
 
+
 		return "HMM [a=" + aValue+"]" + ", pi=" +piValue+"]"
-		+  ", numStates=" + numStates + "]";
+		+  ", numStates=" + numStates +"b="+b+"]";
 	}
 	public HMM(BigDecimal[][] a, BigDecimal[] pi
 			,ArrayList<Distribution> epsilon) {
@@ -55,8 +59,8 @@ public class HMM {
 		this.pi = pi;
 		this.b = epsilon;
 		this.numStates=pi.length;
-		if(epsilon.get(0) instanceof EnumeratedDistribution)
-			this.numEmision = ((EnumeratedDistribution)epsilon.get(0)).getP().size();
+		if(epsilon.get(0) instanceof CategoricalDistribution)
+			this.setNumEmision(((CategoricalDistribution)epsilon.get(0)).getP().size());
 		this.numMixtureComponents = b.get(0).getNumMixtures();
 	}
 	/**
@@ -105,7 +109,7 @@ public class HMM {
 	public void normalizeA(BigDecimal[] sumA) {
 		for(int i=0;i<numStates;i++)
 			for(int j=0;j<numStates;j++){
-				a[i][j]=a[i][j].divide(sumA[i],MathContext.DECIMAL32);
+				a[i][j]=a[i][j].divide(sumA[i],MathContext.DECIMAL64);
 			}
 	}
 	public int getNumMixtureComponents() {
@@ -115,15 +119,25 @@ public class HMM {
 		this.numMixtureComponents = numMixtureComponents;
 	}
 	public void normalize(BigDecimal[] sumA, BigDecimal[] sumB) {
-		for(int i=0;i<numStates;i++)
+		for(int i = 0; i < numStates;i++)
 			for(int j=0;j<numStates;j++){
-				a[i][j]=a[i][j].divide(sumA[i],MathContext.DECIMAL32);
+				a[i][j]=a[i][j].divide(sumA[i],MathContext.DECIMAL64);
 			}
-		for(int i=0;i<numStates;i++)
+		for(int i=0;i < numStates;i++)
 			for(Distribution x:b){
-				EnumeratedDistribution y = ((EnumeratedDistribution)x);
+				CategoricalDistribution y = ((CategoricalDistribution)x);
 				y.Normilize(sumB[i]);
 			}	
+	}
+
+	public int getNumEmision() {
+		return numEmision;
+	}
+	public void setNumEmision(int numEmision) {
+		this.numEmision = numEmision;
+	}
+	public void updateEmision(Observation x, BigDecimal y, int i) {
+		((CategoricalDistribution)this.b.get(i)).update(x, y);
 	}
 
 
