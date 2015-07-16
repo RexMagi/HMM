@@ -25,11 +25,11 @@ public class machineLearning {
 	public static ArrayList<Observation> tlArr = new ArrayList<Observation>();
 	public static ArrayList<Observation> portDstArr = new ArrayList<Observation>();
 	public static ArrayList<Observation> portSrcArr = new ArrayList<Observation>();
-
 	static PcapReader Good = new PcapReader("C:\\Users\\trae\\Desktop\\Good.pcap");
 	static PcapReader Bad = new PcapReader("C:\\Users\\trae\\Desktop\\Bad.pcap");
 	static PcapReader both = new PcapReader("C:\\Users\\trae\\Desktop\\Mix.pcap");
 	public static void main(String[] args) throws IOException {
+			
 		int r = 0; 
 		File Maps;
 		ArrayList<Distribution> distributionSet = new ArrayList<Distribution>();
