@@ -1,6 +1,9 @@
 package marcovModel;
 
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.ArrayList;
@@ -15,10 +18,18 @@ import distributions.Observation;
 public class BaumWelch extends ForwardBackward {
 	BigDecimal[] sumA = new BigDecimal[Model.getNumStates()];//hold the total probability of going from state i to j used to average so that all sets sum to one
 	BigDecimal[] sumB = new BigDecimal[Model.getNumStates()];//holds the total probability of observing all the symbols used to average so that all sets sum to one
-
+	static int q = 0;
+	PrintWriter states;
+	PrintWriter LikelyHood;
 	public BaumWelch(ArrayList<Observation> trainingSet, HMM model) {
 		super(trainingSet, model);
-
+		q++;
+		try {
+			states = new PrintWriter("States"+q+".txt", "UTF-8");
+			LikelyHood = new PrintWriter("LiklyHood"+q+".txt", "UTF-8");
+		} catch (FileNotFoundException | UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
 	}
 	//updates the probability form going form state i to j
 	//equation 
@@ -31,6 +42,7 @@ public class BaumWelch extends ForwardBackward {
 		}
 		return num.divide(denom,MathContext.DECIMAL128);
 	}
+
 	//updates the probability of observing x in state i 
 	//Equation
 	//b_i(V_k) = the expected number of times in state i and observing symbol v_k/the expected number of times in state i  
@@ -42,7 +54,8 @@ public class BaumWelch extends ForwardBackward {
 			denum = denum.add(gamma(i,t));
 		}
 		return num.divide(denum,MathContext.DECIMAL128);
-	}	
+	}
+
 	private BigDecimal[] updateMu(int j, int k){
 		BigDecimal[] Nu = new BigDecimal[trainingSet.get(0).getData().size()];
 		BigDecimal temp = new BigDecimal(0);
@@ -59,6 +72,7 @@ public class BaumWelch extends ForwardBackward {
 
 		return Nu;
 	}
+
 	private BigDecimal[] updateSigma(int j, int k,BigDecimal[] mu){
 		BigDecimal[] newSigma = new BigDecimal[trainingSet.get(0).getData().size()];
 		BigDecimal[] temp1 = new BigDecimal[mu.length];
@@ -87,6 +101,7 @@ public class BaumWelch extends ForwardBackward {
 		return newSigma;
 
 	}
+
 	private BigDecimal updateC(int i, int m, int mCount){
 		BigDecimal c = new BigDecimal(0);
 		BigDecimal temp = new BigDecimal(0);
@@ -189,20 +204,24 @@ public class BaumWelch extends ForwardBackward {
 			forward();
 			back();
 			//BigDecimal temp = new BigDecimal(0);
-				//for(int j = 0;j < trainingSet.size();j++){
-					//temp = temp.add(alpha[0][j]);
-					//System.out.println(beta[i][j]);
-				//	}
+			//for(int j = 0;j < trainingSet.size();j++){
+			//temp = temp.add(alpha[0][j]);
+			//System.out.println(beta[i][j]);
+			//	}
 			//System.out.println(temp);
 			if(Model.getB(0) instanceof CategoricalDistribution)
 				updateDiscrete();
 			else 
 				updateContinuous();
-			System.out.println("Log Likely Hood "+ ((logLikelyHood.doubleValue())) );
-			System.out.println(Model);
+
+			LikelyHood.println(((logLikelyHood.doubleValue())) );
+			states.println(Model);
 		}
 		//Model.normalize(sumA,sumB);
-		System.out.println(Model);
+		//	System.out.println(Model);
+		LikelyHood.flush();
+		states.close();
 	}
 
 }
+

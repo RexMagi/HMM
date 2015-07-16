@@ -29,11 +29,7 @@ public class ForwardBackward  {
 					c[t] = new BigDecimal(0);
 				}
 				if( t!= 0){
-					//logLikelyHood = logLikelyHood.add(
-						//	BigDecimal.valueOf(
-							//		Math.log10((
-								//			BigDecimal.valueOf(1).divide(
-									//				c[t-1],MathContext.DECIMAL128)).doubleValue())));
+					logLikelyHood = logLikelyHood.add(c[t-1],MathContext.DECIMAL128);
 
 					//alpha[i][t-1] = alpha[i][t-1].divide(c[t-1],MathContext.DECIMAL128);
 				}

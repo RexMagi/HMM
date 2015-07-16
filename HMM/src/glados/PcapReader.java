@@ -1,8 +1,8 @@
 package glados;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 
+
+import java.util.ArrayList;
+import java.util.HashMap;
 import org.jnetpcap.Pcap;
 import org.jnetpcap.packet.JPacket;
 import org.jnetpcap.packet.JPacketHandler;
@@ -18,11 +18,11 @@ public class PcapReader implements JPacketHandler<StringBuilder>{
 	final Ip6 ipv6 = new Ip6();	
 	final StringBuilder errbuf = new StringBuilder();// error buffer
 	ArrayList<ArrayList<Object>> packetData= new ArrayList<ArrayList<Object>>() ;
-	
+	HashMap<Integer, Integer> portMap = new HashMap<Integer, Integer>();
+
 	//takes in a file and opens a file reader stream from pcap manipulator
 	public PcapReader(String fileName){
 		this.fileName=fileName;
-		HashMap<Integer, Integer> portMap = new HashMap<Integer, Integer>();
 		//risk
 		portMap.put(19,3);
 		portMap.put(1214,3);
@@ -221,7 +221,7 @@ public class PcapReader implements JPacketHandler<StringBuilder>{
 		portMap.put(13720,1);
 		portMap.put(13721,1);
 		portMap.put(24800,1);
-		}
+	}
 	//loops x number of times to collect data
 	public void loop(int x){
 		pcap = Pcap.openOffline(fileName, errbuf);
@@ -243,7 +243,7 @@ public class PcapReader implements JPacketHandler<StringBuilder>{
 		 * then get that header (peer header definition instance with memory in 
 		 * the packet) in 2 separate steps. 
 		 */  
-		
+
 		if (packet.hasHeader(Ip4.ID)) {  
 
 			/* 
@@ -252,27 +252,51 @@ public class PcapReader implements JPacketHandler<StringBuilder>{
 			 */  
 			packet.getHeader(ipv4);
 			packet.getHeader(tcp); 
-			String temp="";
+			int prefix = (ipv4.destination()[0]&0xFF);
+			int middle = (ipv4.destination()[1]&0xFF);
 
+			if(prefix == 10 || (prefix == 172 && (middle >= 16 || middle <= 31))
+					|| (prefix == 192 && middle == 168) )
+				pckt.add(1);//private 
+			else
+				pckt.add(2);//public
 
+			prefix = ipv4.source()[0]&0xFF;
+			middle = ipv4.source()[1]&0xFF;
 
-			for(int x=0;x<4;x++)
-				temp+=Integer.toString(ipv4.destination()[x]&0xFF )+((x!=3)?".":"");
-			pckt.add(temp);
-			temp="";
+			if(prefix == 10 || (prefix == 172 && (middle >= 16 || middle <= 31))
+					|| (prefix == 192 && middle == 168) )
+				pckt.add(1);//private
+			else
+				pckt.add(2);//public
 
-
-			for(int x=0;x<4;x++)
-				temp+=Integer.toString(ipv4.source()[x]&0xFF )+((x!=3)?".":"");
-			pckt.add(temp);
-
-
-			pckt.add(new Integer(ipv4.getPayload().length));    
-			pckt.add(new Integer(tcp.destination()));  
-			pckt.add(new Integer(tcp.source()));
+			pckt.add(new Integer(ipv4.getPayload().length)); 
+			Integer temp;
+			try{
+			 temp = portMap.get(tcp.destination());
+			 
+			if (temp == null)
+				pckt.add(2);
+			else 
+				pckt.add(temp);
+			}catch(NullPointerException e){
+				
+				pckt.add(2);
+			}
+			
+			try{
+			temp= portMap.get(tcp.source());
+			
+			if (temp == null)
+				pckt.add(2);
+			else 
+				pckt.add(temp);
+			}catch(NullPointerException e){
+				
+				pckt.add(2);
+			}
+			packetData.add(pckt);
 		}
-		
-
 	}
 	/**
 	  @return the fileName
@@ -292,5 +316,5 @@ public class PcapReader implements JPacketHandler<StringBuilder>{
 	public void setPacketData(ArrayList<ArrayList<Object>> packetData) {
 		this.packetData = packetData;
 	}
-	
+
 }

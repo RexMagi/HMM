@@ -2,9 +2,10 @@ package distributions;
 
 
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Observation {
+public class Observation implements Serializable {
 	/* 
 	 * the symbols used to describe the emission probabilities stored as doubles to maintain  
 	 * generality with continuous pdf's
