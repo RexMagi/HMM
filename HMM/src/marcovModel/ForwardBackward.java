@@ -19,13 +19,11 @@ public class ForwardBackward implements Runnable  {
 	volatile BigDecimal gammaSum[];
 	volatile BigDecimal alphaTimesBeta[];
 	ArrayList<ArrayList<BigDecimal>> memoryArr;
-
 	ArrayList<Observation> trainingSet;//the set being iterated over
 	HMM Model;//the hidden markov model
 	BigDecimal c[];//the scaling coefficient used to scale the alpha and beta values when they might become to small 
 	BigDecimal logLikelyHood;//used to store how likely the given sequence is logged to improve scale 
 	int lastState;
-
 
 	public ForwardBackward(ArrayList<Observation> Observation, HMM model) {
 		this.trainingSet = Observation;
@@ -167,6 +165,7 @@ public class ForwardBackward implements Runnable  {
 		}
 
 		//System.out.println(temp.divide(temp2,MathContext.DECIMAL128));
+	
 		return temp.divide(temp2,MathContext.DECIMAL128);
 	}
 

@@ -16,16 +16,18 @@ import distributions.Observation;
 
 
 public class BaumWelch extends ForwardBackward {
-	BigDecimal[] sumA = new BigDecimal[Model.getNumStates()];//hold the total probability of going from state i to j used to average so that all sets sum to one
-	BigDecimal[] sumB = new BigDecimal[Model.getNumStates()];//holds the total probability of observing all the symbols used to average so that all sets sum to one
+	volatile BigDecimal[] sumA = new BigDecimal[Model.getNumStates()];//hold the total probability of going from state i to j used to average so that all sets sum to one
+	volatile BigDecimal[] sumB = new BigDecimal[Model.getNumStates()];//holds the total probability of observing all the symbols used to average so that all sets sum to one
+	volatile BigDecimal ttrans[][];
+	volatile ArrayList<Distribution> b;
 	static int q = 0;
 	PrintWriter states;
 	PrintWriter LikelyHood;
 
 	public BaumWelch(HMM model){
 		super(null, model);
-		
-		
+
+
 	}
 
 	public BaumWelch(ArrayList<Observation> trainingSet, HMM model) {
@@ -42,28 +44,37 @@ public class BaumWelch extends ForwardBackward {
 	//updates the probability form going form state i to j
 	//equation 
 	//a_i_j = expected number of transitions form state i to j/ expected number of transitions from state i
-	private BigDecimal updateA(int i, int j){
-		BigDecimal num = new BigDecimal(0.);
-		for(int t = 0; t < trainingSet.size() - 1 ;t++){
-			num = num.add(xi[i][j][t]);
-		}
-		return num.divide(gammaSum[i].subtract(gammaDiscrete[i][trainingSet.size() - 1]),MathContext.DECIMAL128);
-	}
+	private void updateA(){
+		for(int i = 0; i < Model.getNumStates();i++)
+			for(int j = 0; j < Model.getNumStates();j++){
+				BigDecimal num = new BigDecimal(0.);
+				for(int t = 0; t < trainingSet.size() - 1 ;t++){
+					num = num.add(xi[i][j][t]);
+				}
+				ttrans[i][j] =num.divide(gammaSum[i].subtract(gammaDiscrete[i][trainingSet.size() - 1]),MathContext.DECIMAL128);
+				sumA[i] = sumA[i].add(ttrans[i][j]);
+			}
 
+	}
 	//updates the probability of observing x in state i 
 	//Equation
 	//b_i(V_k) = the expected number of times in state i and observing symbol v_k/the expected number of times in state i  
-	private BigDecimal updateB(int i,Observation x ){
-		BigDecimal num = new BigDecimal(0.);
-		for(int t = 0;t < trainingSet.size()  ;t++){
-			if(trainingSet.get(t).equals(x))
-				num = num.add(this.gammaDiscrete[i][t]);
-			
+	private void updateBDiscrte(){
+		for(int i = 0; i < Model.getNumStates();i++){
+			HashMap<Observation,BigDecimal> x = new HashMap<Observation,BigDecimal>();
+			for(Observation vk: ((CategoricalDistribution)Model.getB(i)).getObservations()){
+				BigDecimal num = new BigDecimal(0.);
+				for(int t = 0;t < trainingSet.size()  ;t++)
+					if(trainingSet.get(t).equals(vk))
+						num = num.add(this.gammaDiscrete[i][t]);
+
+				x.put(vk,num.divide(gammaSum[i],MathContext.DECIMAL128) ) ;
+				sumB[i] = sumB[i].add(x.get(vk));
+			}
+			b.add(new CategoricalDistribution(x));
 		}
 
-		return num.divide(gammaSum[i],MathContext.DECIMAL128);
 	}
-
 	private BigDecimal[] updateMu(int j, int k){
 		BigDecimal[] Nu = new BigDecimal[trainingSet.get(0).getData().size()];
 		BigDecimal temp = new BigDecimal(0);
@@ -75,7 +86,7 @@ public class BaumWelch extends ForwardBackward {
 						trainingSet.get(x).getData().get(y)).multiply(gamma(j,k,x)));
 				temp = temp.add(gammaContinuous[j][k][x]);
 			}
-		
+
 		for(BigDecimal x:Nu)
 			x = x.divide(temp,MathContext.DECIMAL128);
 
@@ -125,8 +136,8 @@ public class BaumWelch extends ForwardBackward {
 	//updates each of the major properties of the hidden Markov model 
 	public void updateDiscrete(){
 		BigDecimal[] tpi = new BigDecimal[Model.getNumStates()];//holds the temporary pi
-		BigDecimal ttrans[][] = new BigDecimal[Model.getNumStates()][Model.getNumStates()];//holds the temporary transition matrix 
-		ArrayList<Distribution> b = new ArrayList<Distribution>();//holds the temporary emission functions
+		ttrans = new BigDecimal[Model.getNumStates()][Model.getNumStates()];//holds the temporary transition matrix 
+		b = new ArrayList<Distribution>();//holds the temporary emission functions
 		//sets pi for all states to the probability of observing the first element in the training sequence 
 		//initializes the normalizing coefficient for all states 
 		for(int x = 0;x < Model.getNumStates();x++ ){
@@ -135,22 +146,28 @@ public class BaumWelch extends ForwardBackward {
 			sumB[x] = new BigDecimal(0);
 		}
 		//updates the transition matrix
-		for(int i = 0; i < Model.getNumStates();i++)
-			for(int j = 0; j < Model.getNumStates();j++){
-				ttrans[i][j] = updateA(i,j);
-				sumA[i] = sumA[i].add(ttrans[i][j]);
-			}
+		
+		job = 4;
+		Thread trans = new Thread(this);
+		trans.start();
+		try {
+			Thread.sleep(200);
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		
 		//updates the transition matrix 
-		for(int i = 0; i < Model.getNumStates();i++){
-			HashMap<Observation,BigDecimal> x = new HashMap<Observation,BigDecimal>();
-			for(Observation vk: ((CategoricalDistribution)Model.getB(i)).getObservations()){
-				BigDecimal temp = updateB(i,vk);
-				sumB[i] = sumB[i].add(temp);
-				x.put(vk, temp);
-			}	
-			b.add(new CategoricalDistribution(x));
+		job = 5;
+		Thread emit = new Thread(this);
+		emit.start();
+		try {
+			Thread.sleep(200);
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
+		
 		Model.setPi(tpi);
 		Model.setA(ttrans);
 		Model.setB(b);
@@ -160,19 +177,18 @@ public class BaumWelch extends ForwardBackward {
 	// check differing gamma() calls, this one is of 2 args, might have to be 3.
 	public void updateContinuous(){
 		BigDecimal[] tpi = new BigDecimal[Model.getNumStates()];
-		BigDecimal ttrans[][] = new BigDecimal[Model.getNumStates()][Model.getNumStates()];
-		BigDecimal[] sumA = new BigDecimal[Model.getNumStates()];
-		BigDecimal[] sumB = new BigDecimal[Model.getNumStates()];
+		ttrans = new BigDecimal[Model.getNumStates()][Model.getNumStates()];
+
 		for(int x = 0;x < Model.getNumStates();x++ ){
 			tpi[x] = gamma(x,0);
 			sumA[x] = new BigDecimal(0);
 			sumB[x] = new BigDecimal(0);
 		}
-		for(int i = 0; i < Model.getNumStates();i++)
-			for(int j = 0; j < Model.getNumStates();j++){
-				ttrans[i][j] = updateA(i,j);
-				sumA[i] = sumA[i].add(ttrans[i][j]);
-			}
+
+		job = 4;
+		Thread trans = new Thread(this);
+		trans.start();
+
 
 		for(int x = 0;x < Model.getNumStates();x++)
 			for(int y = 0; y < Model.getNumMixtureComponents();y++){
@@ -198,7 +214,7 @@ public class BaumWelch extends ForwardBackward {
 			gammaContinuous =  new BigDecimal[Model.getNumStates()][trainingSet.size()][Model.getNumMixtureComponents()];
 			xi = new BigDecimal[Model.getNumStates()][Model.getNumStates()][trainingSet.size()];
 			alphaTimesBeta  = new BigDecimal[trainingSet.size()];
-			
+
 			for(int i = 0;i < Model.getNumStates();i++)
 				for(int t = 0;t < trainingSet.size();t++){
 					alpha[i][t] = new BigDecimal(0.);
@@ -219,14 +235,14 @@ public class BaumWelch extends ForwardBackward {
 			job = 1;
 			Thread back = new Thread(this);
 			back.start();
-			
+
 			try {
 				Thread.sleep(200);
 			} catch (InterruptedException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-			
+
 			try {
 				forward.join();
 				back.join();
@@ -245,15 +261,15 @@ public class BaumWelch extends ForwardBackward {
 			}
 			job = 3;
 			Thread xi = new Thread(this);
-				xi.start();
-				try {
-					gamma.join();
-					xi.join();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
+			xi.start();
+			try {
+				gamma.join();
+				xi.join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
 
 			if(Model.getB(0) instanceof CategoricalDistribution)
 				updateDiscrete();
@@ -268,14 +284,20 @@ public class BaumWelch extends ForwardBackward {
 		LikelyHood.flush();
 		states.close();
 	}
-	/* (non-Javadoc)
-	 * @see marcovModel.ForwardBackward#run()
-	 */
+
 	@Override
 	public void run() {
-		// TODO Auto-generated method stub
-		super.run();		
 
+		super.run();		
+		switch(job){
+		case 4:
+			updateA();
+			break;
+		case 5:
+			updateBDiscrte();
+			break;
+
+		}
 	}
 
 }
