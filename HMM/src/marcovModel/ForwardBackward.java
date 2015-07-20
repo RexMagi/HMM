@@ -50,6 +50,7 @@ public class ForwardBackward implements Runnable  {
 				}
 				if( t!= 0){
 					logLikelyHood = logLikelyHood.add(c[t-1],MathContext.DECIMAL128);
+
 				}
 				if(t == 0){
 					//sets alpha at time 1 to pi for that state times the probability of

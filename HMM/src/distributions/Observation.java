@@ -7,11 +7,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Observation implements Serializable {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 8375214004563493825L;
 	HashMap<Integer, Integer> portMap = new HashMap<Integer, Integer>();
+
 	/* 
 	 * the symbols used to describe the emission probabilities stored as doubles to maintain  
 	 * generality with continuous pdf's

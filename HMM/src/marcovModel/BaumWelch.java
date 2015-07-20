@@ -21,15 +21,17 @@ public class BaumWelch extends ForwardBackward {
 	static int q = 0;
 	PrintWriter states;
 	PrintWriter LikelyHood;
+
 	public BaumWelch(HMM model){
 		super(null, model);
 		
 		
 	}
+
 	public BaumWelch(ArrayList<Observation> trainingSet, HMM model) {
 		super(trainingSet, model);
 		q++;
-		
+
 		try {
 			states = new PrintWriter("States"+q+".txt", "UTF-8");
 			LikelyHood = new PrintWriter("LiklyHood"+q+".txt", "UTF-8");
@@ -58,6 +60,7 @@ public class BaumWelch extends ForwardBackward {
 				num = num.add(this.gammaDiscrete[i][t]);
 			
 		}
+
 		return num.divide(this.gammaSum[i],MathContext.DECIMAL128);
 	}
 
@@ -248,6 +251,7 @@ public class BaumWelch extends ForwardBackward {
 					e.printStackTrace();
 				}
 				
+
 			if(Model.getB(0) instanceof CategoricalDistribution)
 				updateDiscrete();
 			else 
@@ -256,6 +260,7 @@ public class BaumWelch extends ForwardBackward {
 			LikelyHood.println(((logLikelyHood.doubleValue())) );
 			states.println(Model);
 		}
+
 		LikelyHood.flush();
 		states.close();
 	}
@@ -266,6 +271,7 @@ public class BaumWelch extends ForwardBackward {
 	public void run() {
 		// TODO Auto-generated method stub
 		super.run();		
+
 	}
 
 }
