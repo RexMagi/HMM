@@ -25,9 +25,12 @@ public class machineLearning {
 	public static ArrayList<Observation> tlArr = new ArrayList<Observation>();
 	public static ArrayList<Observation> portDstArr = new ArrayList<Observation>();
 	public static ArrayList<Observation> portSrcArr = new ArrayList<Observation>();
-	static PcapReader Good = new PcapReader("C:\\Users\\trae\\Desktop\\Good.pcap");
-	static PcapReader Bad = new PcapReader("C:\\Users\\trae\\Desktop\\Bad.pcap");
-	static PcapReader both = new PcapReader("C:\\Users\\trae\\Desktop\\Mix.pcap");
+
+	static PcapReader Good = new PcapReader("C:\\Users\\trae\\Documents\\GitHub\\HMM\\data\\Good.pcap");
+	static PcapReader Bad = new PcapReader("C:\\Users\\trae\\Documents\\GitHub\\HMM\\data\\Bad.pcap");
+	static PcapReader both = new PcapReader("C:\\Users\\trae\\Documents\\GitHub\\HMM\\data\\Mix.pcap");
+
+
 	public static void main(String[] args) throws IOException {
 			
 		int r = 0; 
@@ -58,7 +61,9 @@ public class machineLearning {
 		distributionSet.add(new CategoricalDistribution(Table));
 		Bot = new HMM(a.clone(),pi.clone(),distributionSet);
 		teacher = new BaumWelch(dstArr,Bot);
-		teacher.learn();
+
+		teacher.learn(100);
+
 		Maps = new File("HMMG"+(r++)+".txt");
 		try
 		{
@@ -85,7 +90,9 @@ public class machineLearning {
 		distributionSet.add(new CategoricalDistribution(Table));
 		Bot = new HMM(a.clone(),pi.clone(),distributionSet);
 		teacher = new BaumWelch(srcArr,Bot);
-		teacher.learn();
+
+		teacher.learn(100);
+
 		Maps = new File("HMMG"+(r++)+".txt");
 		try
 		{
@@ -113,7 +120,10 @@ public class machineLearning {
 		distributionSet.add(new CategoricalDistribution(Table));
 		Bot = new HMM(a.clone(),pi.clone(),distributionSet);
 		teacher = new BaumWelch(portDstArr,Bot);
-		teacher.learn();
+
+		teacher.learn(100);
+
+
 		Maps = new File("HMMG"+(r++)+".txt");
 		try
 		{
@@ -141,7 +151,9 @@ public class machineLearning {
 		distributionSet.add(new CategoricalDistribution(Table));
 		Bot = new HMM(a.clone(),pi.clone(),distributionSet);
 		teacher = new BaumWelch(portSrcArr,Bot);
-		teacher.learn();
+
+		teacher.learn(100);
+
 		Maps = new File("HMMG"+(r++)+".txt");
 		try
 		{
@@ -158,18 +170,20 @@ public class machineLearning {
 		}
 
 		//sets up the distribution for tlArr and than has it learn and write results to file 
+		Table = new HashMap<Observation,BigDecimal>();
 		distributionSet = new ArrayList<Distribution>();
-		BigDecimal C[] = {new BigDecimal(.33333),new BigDecimal(.3333),new BigDecimal(.3333)};
-		Gaussian[] functions ={new Gaussian(new BigDecimal(0),new BigDecimal(200)),
-				new Gaussian(new BigDecimal(1200),new BigDecimal(80))
-		,new Gaussian(new BigDecimal(600),new BigDecimal(90)) };
-		distributionSet.add(new MixtureDistribution(C.clone(),functions));
-		distributionSet.add(new MixtureDistribution(C.clone(),functions));
-		distributionSet.add(new MixtureDistribution(C.clone(),functions));
+		for(int y=0;y<2000;y++)
+		Table.put(new Observation(y+1),BigDecimal.valueOf(1./2000));
+		
 
+		distributionSet.add(new CategoricalDistribution(Table));
+		distributionSet.add(new CategoricalDistribution(Table));
+		distributionSet.add(new CategoricalDistribution(Table));
+		
 		Bot = new HMM(a.clone(),pi.clone(),distributionSet);
 		teacher = new BaumWelch(portSrcArr,Bot);
-		teacher.learn();
+		teacher.learn(100);
+
 		Maps = new File("HMMG"+(r++)+".txt");
 		try
 		{
@@ -201,7 +215,9 @@ public class machineLearning {
 		distributionSet.add(new CategoricalDistribution(Table));
 		Bot = new HMM(a.clone(),pi.clone(),distributionSet);
 		teacher = new BaumWelch(dstArr,Bot);
-		teacher.learn();
+
+		teacher.learn(100);
+
 		Maps = new File("HMMB"+(r++)+".txt");
 		try
 		{
@@ -228,7 +244,9 @@ public class machineLearning {
 		distributionSet.add(new CategoricalDistribution(Table));
 		Bot = new HMM(a.clone(),pi.clone(),distributionSet);
 		teacher = new BaumWelch(srcArr,Bot);
-		teacher.learn();
+
+		teacher.learn(100);
+
 		Maps = new File("HMMB"+(r++)+".txt");
 		try
 		{
@@ -256,7 +274,9 @@ public class machineLearning {
 		distributionSet.add(new CategoricalDistribution(Table));
 		Bot = new HMM(a.clone(),pi.clone(),distributionSet);
 		teacher = new BaumWelch(portDstArr,Bot);
-		teacher.learn();
+
+		teacher.learn(100);
+
 		Maps = new File("HMMB"+(r++)+".txt");
 		try
 		{
@@ -284,7 +304,9 @@ public class machineLearning {
 		distributionSet.add(new CategoricalDistribution(Table));
 		Bot = new HMM(a.clone(),pi.clone(),distributionSet);
 		teacher = new BaumWelch(portSrcArr,Bot);
-		teacher.learn();
+
+		teacher.learn(100);
+
 		Maps = new File("HMMB"+(r++)+".txt");
 		try
 		{
@@ -301,18 +323,17 @@ public class machineLearning {
 		}
 
 		//sets up the distribution for tlArr and than has it learn and write results to file 
+
+		Table = new HashMap<Observation,BigDecimal>();
 		distributionSet = new ArrayList<Distribution>();
-		BigDecimal C2[] = {new BigDecimal(.33333),new BigDecimal(.3333),new BigDecimal(.3333)};
-		Gaussian[] functions2 ={new Gaussian(new BigDecimal(0),new BigDecimal(200)),
-				new Gaussian(new BigDecimal(1200),new BigDecimal(80))
-		,new Gaussian(new BigDecimal(600),new BigDecimal(90)) };
-		distributionSet.add(new MixtureDistribution(C2.clone(),functions2));
-		distributionSet.add(new MixtureDistribution(C2.clone(),functions2));
-		distributionSet.add(new MixtureDistribution(C2.clone(),functions2));
+		for(int y=0;y<2000;y++)
+		Table.put(new Observation(y+1),BigDecimal.valueOf(1./2000));
+		
 
 		Bot = new HMM(a.clone(),pi.clone(),distributionSet);
 		teacher = new BaumWelch(portSrcArr,Bot);
-		teacher.learn();
+		teacher.learn(100);
+
 		Maps = new File("HMMB"+(r++)+".txt");
 		try
 		{
@@ -343,7 +364,9 @@ public class machineLearning {
 		distributionSet.add(new CategoricalDistribution(Table));
 		Bot = new HMM(a.clone(),pi.clone(),distributionSet);
 		teacher = new BaumWelch(dstArr,Bot);
-		teacher.learn();
+
+		teacher.learn(100);
+
 		Maps = new File("HMMm"+(r++)+".txt");
 		try
 		{
@@ -370,7 +393,9 @@ public class machineLearning {
 		distributionSet.add(new CategoricalDistribution(Table));
 		Bot = new HMM(a.clone(),pi.clone(),distributionSet);
 		teacher = new BaumWelch(srcArr,Bot);
-		teacher.learn();
+
+		teacher.learn(100);
+
 		Maps = new File("HMMm"+(r++)+".txt");
 		try
 		{
@@ -398,7 +423,9 @@ public class machineLearning {
 		distributionSet.add(new CategoricalDistribution(Table));
 		Bot = new HMM(a.clone(),pi.clone(),distributionSet);
 		teacher = new BaumWelch(portDstArr,Bot);
-		teacher.learn();
+
+		teacher.learn(100);
+
 		Maps = new File("HMMm"+(r++)+".txt");
 		try
 		{
@@ -426,7 +453,9 @@ public class machineLearning {
 		distributionSet.add(new CategoricalDistribution(Table));
 		Bot = new HMM(a.clone(),pi.clone(),distributionSet);
 		teacher = new BaumWelch(portSrcArr,Bot);
-		teacher.learn();
+
+		teacher.learn(100);
+
 		Maps = new File("HMMm"+(r++)+".txt");
 		try
 		{
@@ -443,18 +472,17 @@ public class machineLearning {
 		}
 
 		//sets up the distribution for tlArr and than has it learn and write results to file 
+
+		Table = new HashMap<Observation,BigDecimal>();
 		distributionSet = new ArrayList<Distribution>();
-		BigDecimal C3[] = {new BigDecimal(.33333),new BigDecimal(.3333),new BigDecimal(.3333)};
-		Gaussian[] functions3 ={new Gaussian(new BigDecimal(0),new BigDecimal(200)),
-				new Gaussian(new BigDecimal(1200),new BigDecimal(80))
-		,new Gaussian(new BigDecimal(600),new BigDecimal(90)) };
-		distributionSet.add(new MixtureDistribution(C3.clone(),functions3));
-		distributionSet.add(new MixtureDistribution(C3.clone(),functions3));
-		distributionSet.add(new MixtureDistribution(C3.clone(),functions3));
+		for(int y=0;y<2000;y++)
+		Table.put(new Observation(y+1),BigDecimal.valueOf(1./2000));
+		
 
 		Bot = new HMM(a.clone(),pi.clone(),distributionSet);
 		teacher = new BaumWelch(portSrcArr,Bot);
-		teacher.learn();
+		teacher.learn(100);
+
 		Maps = new File("HMMm"+(r++)+".txt");
 		try
 		{
