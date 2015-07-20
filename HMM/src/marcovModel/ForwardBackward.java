@@ -10,7 +10,7 @@ import distributions.Observation;
 public class ForwardBackward  {
 	BigDecimal alpha[][];//should be set to [number of states][size of training set-1]
 	BigDecimal beta[][];//should be set to [number of states][size of training set-1]
-	ArrayList<BigDecimal> squence;
+	ArrayList<ArrayList<BigDecimal>> memoryArr;
 	ArrayList<Observation> trainingSet;//the set being iterated over
 	ArrayList<Observation>  Data;//the total set of observations
 	HMM Model;//the hidden markov model
@@ -49,23 +49,23 @@ public class ForwardBackward  {
 					alpha[i][t] = Model.pdf(i,trainingSet.get(t)).multiply(
 							temp);
 				}
-				
+
 				c[t] = c[t].add(alpha[i][t]);	
 			} 
 		//for(int i = 0;i < Model.getNumStates();i++)
-			//alpha[i][trainingSet.size() - 1 ] = alpha[i][trainingSet.size() - 1]
-				//	.divide(c[trainingSet.size() - 1],MathContext.DECIMAL128);
+		//alpha[i][trainingSet.size() - 1 ] = alpha[i][trainingSet.size() - 1]
+		//	.divide(c[trainingSet.size() - 1],MathContext.DECIMAL128);
 	}
 	public void back(){
 		//loops through all states and caches the beta values for those states
 		for(int t = trainingSet.size() - 1;t >= 0;t--)
 			for(int i = 0;i < Model.getNumStates();i++){
 				//if( t!= trainingSet.size()-1)
-					//beta[i][t + 1]=beta[i][t + 1].divide(c[t + 1],MathContext.DECIMAL128);	
+				//beta[i][t + 1]=beta[i][t + 1].divide(c[t + 1],MathContext.DECIMAL128);	
 				//sets the beta value to 1 for the final state
 				if (t == trainingSet.size()-1 ){
 					beta[i][t] = new BigDecimal(1);//BigDecimal.valueOf(1).divide(
-							//c[t],MathContext.DECIMAL128);
+					//c[t],MathContext.DECIMAL128);
 				}
 				else{
 					BigDecimal temp = new BigDecimal(0.);
@@ -81,9 +81,9 @@ public class ForwardBackward  {
 					beta[i][t] = temp;	
 				}
 			}
-	//	for(int i = 0;i < Model.getNumStates();i++)
+		//	for(int i = 0;i < Model.getNumStates();i++)
 		//	beta[i][0] = beta[i][0]
-			//		.divide(c[0],MathContext.DECIMAL128);
+		//		.divide(c[0],MathContext.DECIMAL128);
 
 	}
 	//public void gamma(){}
@@ -119,10 +119,10 @@ public class ForwardBackward  {
 		BigDecimal temp2 = new BigDecimal(0.);
 		BigDecimal temp;
 		if(t != trainingSet.size() - 1 )
-		temp=alpha[i][t].multiply(
-				Model.getA(i,j).multiply(
-						beta[j][t+1].multiply(
-								Model.pdf(j,trainingSet.get(t+1)))));
+			temp=alpha[i][t].multiply(
+					Model.getA(i,j).multiply(
+							beta[j][t+1].multiply(
+									Model.pdf(j,trainingSet.get(t+1)))));
 		else {
 			temp=alpha[i][t].multiply(
 					Model.getA(i,j));
@@ -142,25 +142,32 @@ public class ForwardBackward  {
 		//System.out.println(temp.divide(temp2,MathContext.DECIMAL128));
 		return temp.divide(temp2,MathContext.DECIMAL128);
 	}
-	public BigDecimal alpha(Observation x, int i){
-		BigDecimal alphaVal = null;
-		if(squence == null){
-			alphaVal = Model.getPi(i).multiply
-					(Model.pdf(i,x));
+
+	public void alpha(Observation x){
+		ArrayList<BigDecimal> memAlphas = new ArrayList<BigDecimal>();
+		if (memoryArr == null) {
+			memoryArr = new ArrayList<ArrayList<BigDecimal>>();
+			//sets alpha at time 1 to pi for that state times the probability of
+			//y1 given state i
+			for (int i = 0; i < 3; i++) 
+				memAlphas.add( Model.getPi(i).multiply(Model.pdf(i,x)));
+		}else {	
+			BigDecimal temp = new BigDecimal(0.);
+			for(int i = 0; i < 3; i++) {
+				for(int j = 0;j < Model.getNumStates();j++){
+					temp = temp.add(memAlphas.get(memAlphas.size() - 1)
+							.multiply(Model.getA(j,i)));
+				}
+				memAlphas.add( Model.pdf(i,x).multiply(temp));
+			}
+			//sets alpha for state i at time x to  emission for state i 
+			//for observation x times the sum of the previous alpha in all states times the 
+			//Probability all previous states leads to the current state
+
 		}
-		else{	
-			alphaVal = Model.getPi(i).multiply
-					(Model.pdf(i,x));
-		}
-		return alphaVal;
+		memoryArr.add(memAlphas);
 	}
-	public void append(BigDecimal x){
-		if(squence == null){
-			squence = new ArrayList<BigDecimal>();
-			squence.add(x);
-		}
-		else{
-			squence.add(x);
-		}
+	public ArrayList<BigDecimal> getLastMemArr() {
+		return memoryArr.get(memoryArr.size() - 1);
 	}
 }
