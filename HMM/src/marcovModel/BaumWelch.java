@@ -20,11 +20,23 @@ public class BaumWelch extends ForwardBackward {
 	BigDecimal[] sumB = new BigDecimal[Model.getNumStates()];//holds the total probability of observing all the symbols used to average so that all sets sum to one
 	static int q = 0;
 	PrintWriter states;
+<<<<<<< HEAD
 	PrintWriter LikelyHood; 
 	
+=======
+	PrintWriter LikelyHood;
+
+	public BaumWelch(HMM model){
+		super(null, model);
+		
+		
+	}
+
+>>>>>>> f2973568fe3b27be3a73f8a0458d7f193ca16ef4
 	public BaumWelch(ArrayList<Observation> trainingSet, HMM model) {
 		super(trainingSet, model);
 		q++;
+
 		try {
 			states = new PrintWriter("States"+q+".txt", "UTF-8");
 			LikelyHood = new PrintWriter("LiklyHood"+q+".txt", "UTF-8");
@@ -38,10 +50,9 @@ public class BaumWelch extends ForwardBackward {
 	private BigDecimal updateA(int i, int j){
 		BigDecimal num = new BigDecimal(0.),denom=new BigDecimal(0.);
 		for(int t = 0; t < trainingSet.size() - 1 ;t++){
-			num = num.add(xi(i,j,t));
-			denom = denom.add(gamma(i,t));	
+			num = num.add(xi[i][j][t]);
 		}
-		return num.divide(denom,MathContext.DECIMAL128);
+		return num.divide(gammaSum[i],MathContext.DECIMAL128);
 	}
 
 	//updates the probability of observing x in state i 
@@ -51,10 +62,11 @@ public class BaumWelch extends ForwardBackward {
 		BigDecimal num = new BigDecimal(0.),denum = new BigDecimal(0.);;
 		for(int t = 0;t < trainingSet.size()  ;t++){
 			if(trainingSet.get(t).equals(x))
-				num = num.add(gamma(i,t));
-			denum = denum.add(gamma(i,t));
+				num = num.add(this.gammaDiscrete[i][t]);
+			
 		}
-		return num.divide(denum,MathContext.DECIMAL128);
+
+		return num.divide(this.gammaSum[i],MathContext.DECIMAL128);
 	}
 
 	private BigDecimal[] updateMu(int j, int k){
@@ -123,7 +135,7 @@ public class BaumWelch extends ForwardBackward {
 		//sets pi for all states to the probability of observing the first element in the training sequence 
 		//initializes the normalizing coefficient for all states 
 		for(int x = 0;x < Model.getNumStates();x++ ){
-			tpi[x] =gamma(x,0);
+			tpi[x] =this.gammaDiscrete[x][0];
 			sumA[x] = new BigDecimal(0);
 			sumB[x] = new BigDecimal(0);
 		}
@@ -148,7 +160,6 @@ public class BaumWelch extends ForwardBackward {
 		Model.setB(b);
 		Model.normalize(sumA,sumB);
 	}
-
 	// main difference from updateDiscrete is the call to MixtureDistribution.
 	// check differing gamma() calls, this one is of 2 args, might have to be 3.
 	public void updateContinuous(){
@@ -181,36 +192,72 @@ public class BaumWelch extends ForwardBackward {
 
 	}
 	// make conditional for learn() for udateDiscrete() vs updateContinuous().
-	public void learn(){
-
-		for(int x = 0;x < 100;x++){
+	public void learn(int itr){
+		for(int x = 0;x < itr; x++){
+			
 			logLikelyHood = new BigDecimal(0);
-			/*
-		for(int x = 0; x <= Data.size();x += (Data.size()+1)/100){
-			if(x+Data.size()/100>=Data.size())
-				this.trainingSet = new ArrayList<Observation>(this.Data.subList(x-(Data.size()+1)/100,x));
-			else
-				this.trainingSet = new ArrayList<Observation>(Data.subList(x, x+(Data.size()+1)/100));
-			 */
-			//System.out.println(x);
-			//System.out.println(trainingSet.size());
-			this.trainingSet = new ArrayList<Observation>(Data);
 			alpha = new BigDecimal[Model.getNumStates()][trainingSet.size()];
 			beta = new BigDecimal[Model.getNumStates()][trainingSet.size()];	
+			gammaSum = new BigDecimal[Model.getNumStates()];
+			gammaDiscrete = new BigDecimal[Model.getNumStates()][trainingSet.size()];
+			gammaContinuous =  new BigDecimal[Model.getNumStates()][trainingSet.size()][Model.getNumMixtureComponents()];
+			xi = new BigDecimal[Model.getNumStates()][Model.getNumStates()][trainingSet.size()];
+			
 			for(int i = 0;i < Model.getNumStates();i++)
-				for(int j = 0;j < trainingSet.size();j++){
-					alpha[i][j] = new BigDecimal(0.);
-					beta[i][j] = new BigDecimal(0.);
+				for(int t = 0;t < trainingSet.size();t++){
+					alpha[i][t] = new BigDecimal(0.);
+					beta[i][t] = new BigDecimal(0.);
+					gammaSum[i] = new BigDecimal(0.);
 				}
 
-			forward();
-			back();
-			//BigDecimal temp = new BigDecimal(0);
-			//for(int j = 0;j < trainingSet.size();j++){
-			//temp = temp.add(alpha[0][j]);
-			//System.out.println(beta[i][j]);
-			//	}
-			//System.out.println(temp);
+			job = 0;
+			Thread forward = new Thread(this);
+			forward.start();
+			try {
+				Thread.sleep(200);
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			job = 1;
+			Thread back = new Thread(this);
+			back.start();
+			
+			try {
+				Thread.sleep(200);
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			
+			try {
+				forward.join();
+				back.join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			job = 2;
+			Thread gamma = new Thread(this);
+			gamma.start();
+			try {
+				Thread.sleep(200);
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			job = 3;
+			Thread xi = new Thread(this);
+				xi.start();
+				try {
+					gamma.join();
+					xi.join();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+
 			if(Model.getB(0) instanceof CategoricalDistribution)
 				updateDiscrete();
 			else 
@@ -220,10 +267,18 @@ public class BaumWelch extends ForwardBackward {
 			states.println(Model);
 			System.out.println(Model);
 		}
-		//Model.normalize(sumA,sumB);
-		//	System.out.println(Model);
+
 		LikelyHood.flush();
 		states.close();
+	}
+	/* (non-Javadoc)
+	 * @see marcovModel.ForwardBackward#run()
+	 */
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		super.run();		
+
 	}
 
 }
