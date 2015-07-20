@@ -20,10 +20,6 @@ public class BaumWelch extends ForwardBackward {
 	BigDecimal[] sumB = new BigDecimal[Model.getNumStates()];//holds the total probability of observing all the symbols used to average so that all sets sum to one
 	static int q = 0;
 	PrintWriter states;
-<<<<<<< HEAD
-	PrintWriter LikelyHood; 
-	
-=======
 	PrintWriter LikelyHood;
 
 	public BaumWelch(HMM model){
@@ -32,7 +28,6 @@ public class BaumWelch extends ForwardBackward {
 		
 	}
 
->>>>>>> f2973568fe3b27be3a73f8a0458d7f193ca16ef4
 	public BaumWelch(ArrayList<Observation> trainingSet, HMM model) {
 		super(trainingSet, model);
 		q++;
@@ -48,25 +43,25 @@ public class BaumWelch extends ForwardBackward {
 	//equation 
 	//a_i_j = expected number of transitions form state i to j/ expected number of transitions from state i
 	private BigDecimal updateA(int i, int j){
-		BigDecimal num = new BigDecimal(0.),denom=new BigDecimal(0.);
+		BigDecimal num = new BigDecimal(0.);
 		for(int t = 0; t < trainingSet.size() - 1 ;t++){
 			num = num.add(xi[i][j][t]);
 		}
-		return num.divide(gammaSum[i],MathContext.DECIMAL128);
+		return num.divide(gammaSum[i].subtract(gammaDiscrete[i][trainingSet.size() - 1]),MathContext.DECIMAL128);
 	}
 
 	//updates the probability of observing x in state i 
 	//Equation
 	//b_i(V_k) = the expected number of times in state i and observing symbol v_k/the expected number of times in state i  
 	private BigDecimal updateB(int i,Observation x ){
-		BigDecimal num = new BigDecimal(0.),denum = new BigDecimal(0.);;
+		BigDecimal num = new BigDecimal(0.);
 		for(int t = 0;t < trainingSet.size()  ;t++){
 			if(trainingSet.get(t).equals(x))
 				num = num.add(this.gammaDiscrete[i][t]);
 			
 		}
 
-		return num.divide(this.gammaSum[i],MathContext.DECIMAL128);
+		return num.divide(gammaSum[i],MathContext.DECIMAL128);
 	}
 
 	private BigDecimal[] updateMu(int j, int k){
@@ -78,7 +73,7 @@ public class BaumWelch extends ForwardBackward {
 			for(int x=0;x<trainingSet.size() - 1;x++){
 				Nu[y] = Nu[y].add(BigDecimal.valueOf(
 						trainingSet.get(x).getData().get(y)).multiply(gamma(j,k,x)));
-				temp = temp.add(gamma(j,k,x));
+				temp = temp.add(gammaContinuous[j][k][x]);
 			}
 		
 		for(BigDecimal x:Nu)
@@ -145,6 +140,7 @@ public class BaumWelch extends ForwardBackward {
 				ttrans[i][j] = updateA(i,j);
 				sumA[i] = sumA[i].add(ttrans[i][j]);
 			}
+		
 		//updates the transition matrix 
 		for(int i = 0; i < Model.getNumStates();i++){
 			HashMap<Observation,BigDecimal> x = new HashMap<Observation,BigDecimal>();
@@ -194,7 +190,6 @@ public class BaumWelch extends ForwardBackward {
 	// make conditional for learn() for udateDiscrete() vs updateContinuous().
 	public void learn(int itr){
 		for(int x = 0;x < itr; x++){
-			
 			logLikelyHood = new BigDecimal(0);
 			alpha = new BigDecimal[Model.getNumStates()][trainingSet.size()];
 			beta = new BigDecimal[Model.getNumStates()][trainingSet.size()];	
@@ -202,12 +197,14 @@ public class BaumWelch extends ForwardBackward {
 			gammaDiscrete = new BigDecimal[Model.getNumStates()][trainingSet.size()];
 			gammaContinuous =  new BigDecimal[Model.getNumStates()][trainingSet.size()][Model.getNumMixtureComponents()];
 			xi = new BigDecimal[Model.getNumStates()][Model.getNumStates()][trainingSet.size()];
+			alphaTimesBeta  = new BigDecimal[trainingSet.size()];
 			
 			for(int i = 0;i < Model.getNumStates();i++)
 				for(int t = 0;t < trainingSet.size();t++){
 					alpha[i][t] = new BigDecimal(0.);
 					beta[i][t] = new BigDecimal(0.);
 					gammaSum[i] = new BigDecimal(0.);
+					alphaTimesBeta[t] = new BigDecimal(0.);
 				}
 
 			job = 0;
