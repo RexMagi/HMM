@@ -1,10 +1,19 @@
 package distributions;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 
 
 
 public class MixtureDistribution extends Distribution {
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "MixtureDistribution [C=" + Arrays.toString(C) + ", s="
+				+ Arrays.toString(s) + "]";
+	}
 	/**
 	 * 
 	 */

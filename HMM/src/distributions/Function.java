@@ -5,6 +5,13 @@ import java.math.BigDecimal;
 
 public abstract class Function implements java.io.Serializable{
 
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "Function [mu=" + mu + ", sigma=" + sigma + "]";
+	}
 	/**
 	 * class used to generalize a variety of univariate probability distribution functions 
 	 */
