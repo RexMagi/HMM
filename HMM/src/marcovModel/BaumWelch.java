@@ -20,7 +20,8 @@ public class BaumWelch extends ForwardBackward {
 	BigDecimal[] sumB = new BigDecimal[Model.getNumStates()];//holds the total probability of observing all the symbols used to average so that all sets sum to one
 	static int q = 0;
 	PrintWriter states;
-	PrintWriter LikelyHood;
+	PrintWriter LikelyHood; 
+	
 	public BaumWelch(ArrayList<Observation> trainingSet, HMM model) {
 		super(trainingSet, model);
 		q++;
@@ -67,6 +68,7 @@ public class BaumWelch extends ForwardBackward {
 						trainingSet.get(x).getData().get(y)).multiply(gamma(j,k,x)));
 				temp = temp.add(gamma(j,k,x));
 			}
+		
 		for(BigDecimal x:Nu)
 			x = x.divide(temp,MathContext.DECIMAL128);
 
@@ -216,6 +218,7 @@ public class BaumWelch extends ForwardBackward {
 
 			LikelyHood.println(((logLikelyHood.doubleValue())) );
 			states.println(Model);
+			System.out.println(Model);
 		}
 		//Model.normalize(sumA,sumB);
 		//	System.out.println(Model);
