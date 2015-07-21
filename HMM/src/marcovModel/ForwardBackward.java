@@ -4,9 +4,9 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.ArrayList;
 
-import distributions.CategoricalDistribution;
 import distributions.MixtureDistribution;
 import distributions.Observation;
+
 
 
 public class ForwardBackward implements Runnable  {
@@ -17,24 +17,13 @@ public class ForwardBackward implements Runnable  {
 	volatile BigDecimal xi[][][];//should be set to [number of states][size of training set-1]
 	volatile int job;
 	volatile BigDecimal gammaSum[];
-	ArrayList<BigDecimal> squence;//the probability of each observation in the set attempting to have inferences made on it 
+	volatile BigDecimal alphaTimesBeta[];
+	ArrayList<ArrayList<BigDecimal>> memoryArr;
 	ArrayList<Observation> trainingSet;//the set being iterated over
 	HMM Model;//the hidden markov model
 	BigDecimal c[];//the scaling coefficient used to scale the alpha and beta values when they might become to small 
 	BigDecimal logLikelyHood;//used to store how likely the given sequence is logged to improve scale 
 	int lastState;
-	/**
-	 * @return the squence
-	 */
-	public ArrayList<BigDecimal> getSquence() {
-		return squence;
-	}
-	/**
-	 * @param squence the squence to set
-	 */
-	public void setSquence(ArrayList<BigDecimal> squence) {
-		this.squence = squence;
-	}
 
 	public ForwardBackward(ArrayList<Observation> Observation, HMM model) {
 		this.trainingSet = Observation;
@@ -71,14 +60,18 @@ public class ForwardBackward implements Runnable  {
 
 				c[t] = c[t].add(alpha[i][t]);	
 			} 
+
 	}
 	public void back(){
 		//loops through all states and caches the beta values for those states
 		for(int t = trainingSet.size() - 1;t >= 0;t--)
 			for(int i = 0;i < Model.getNumStates();i++){
+
+
 				//sets the beta value to 1 for the final state
 				if (t == trainingSet.size()-1 ){
 					beta[i][t] = new BigDecimal(1);
+
 				}
 				else{
 					BigDecimal temp = new BigDecimal(0.);
@@ -94,9 +87,10 @@ public class ForwardBackward implements Runnable  {
 					//times the probability all states transition to this state
 					//times the probability that all states emit the next observed data
 					beta[i][t] = temp;	
+					alphaTimesBeta[t] =alphaTimesBeta[t].add(beta[i][t].multiply(alpha[i][t]));
 				}
+				
 			}
-
 	}
 	public void gamma(){
 		for(int i = 0; i < Model.getNumStates();i++)
@@ -171,38 +165,37 @@ public class ForwardBackward implements Runnable  {
 		}
 
 		//System.out.println(temp.divide(temp2,MathContext.DECIMAL128));
+	
 		return temp.divide(temp2,MathContext.DECIMAL128);
 	}
-	public BigDecimal alpha(Observation x, int i){
-		BigDecimal alphaVal = new BigDecimal(0);
-		if(squence == null){
-			alphaVal = Model.getPi(i).multiply
-					(Model.pdf(i,x));
-		}
-		else{	
 
-			alphaVal = alphaVal.add(squence.get(squence.size()-1)
-					.multiply(Model.getA(lastState,i),MathContext.DECIMAL128));
 
-			//sets alpha for state i at time x to  emission for state i 
-			//for observation x times the sum of the previous alpha in all states times the 
-			//Probability all previous states leads to the current state
-			alphaVal =  Model.pdf(i,x).multiply(
-					alphaVal);
+	public void alpha(Observation x){
+		ArrayList<BigDecimal> memAlphas = new ArrayList<BigDecimal>();
+		if (memoryArr == null) {
+			memoryArr = new ArrayList<ArrayList<BigDecimal>>();
+			//sets alpha at time 1 to pi for that state times the probability of
+			//y1 given state i
+			for (int i = 0; i < 3; i++) 
+				memAlphas.add( Model.getPi(i).multiply(Model.pdf(i,x)));
 		}
-		return alphaVal;
+		else {	
+			BigDecimal temp = new BigDecimal(0.);
+			for(int i = 0; i < 3; i++) {
+				for(int j = 0;j < Model.getNumStates();j++){
+					temp = temp.add(memAlphas.get(memAlphas.size() - 1)
+							.multiply(Model.getA(j,i)));
+				}
+				memAlphas.add( Model.pdf(i,x).multiply(temp));
+			}
+		}
+		memoryArr.add(memAlphas);
 	}
-	public void append(BigDecimal x,int state){
-		if(squence == null){
-			lastState = state;
-			squence = new ArrayList<BigDecimal>();
-			squence.add(x);
-		}
-		else{
-			lastState = state;
-			squence.add(x);
-		}
+
+	public ArrayList<BigDecimal> getLastMemArr() {
+		return memoryArr.get(memoryArr.size() - 1);
 	}
+
 	@Override
 	public void run() {
 

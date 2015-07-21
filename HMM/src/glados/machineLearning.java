@@ -7,9 +7,7 @@ import java.io.ObjectOutputStream;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.Scanner;
 import marcovModel.BaumWelch;
 import marcovModel.HMM;
 import distributions.Distribution;
@@ -26,13 +24,12 @@ public class machineLearning {
 	public static ArrayList<Observation> portDstArr = new ArrayList<Observation>();
 	public static ArrayList<Observation> portSrcArr = new ArrayList<Observation>();
 
-	static PcapReader Good = new PcapReader("C:\\Users\\trae\\Documents\\GitHub\\HMM\\data\\Good.pcap");
-	static PcapReader Bad = new PcapReader("C:\\Users\\trae\\Documents\\GitHub\\HMM\\data\\Bad.pcap");
-	static PcapReader both = new PcapReader("C:\\Users\\trae\\Documents\\GitHub\\HMM\\data\\Mix.pcap");
-
+	static PcapReader Good = new PcapReader("C:\\Users\\Lab User\\Downloads\\Good.pcap");
+	static PcapReader Bad = new PcapReader("C:\\Users\\Lab User\\Downloads\\Bad.pcap");
+	static PcapReader both = new PcapReader("C:\\Users\\Lab User\\Downloads\\Mix.pcap");
 
 	public static void main(String[] args) throws IOException {
-			
+
 		int r = 0; 
 		File Maps;
 		ArrayList<Distribution> distributionSet = new ArrayList<Distribution>();
@@ -60,6 +57,7 @@ public class machineLearning {
 		distributionSet.add(new CategoricalDistribution(Table));
 		distributionSet.add(new CategoricalDistribution(Table));
 		Bot = new HMM(a.clone(),pi.clone(),distributionSet);
+
 		teacher = new BaumWelch(dstArr,Bot);
 
 		teacher.learn(100);
@@ -73,7 +71,7 @@ public class machineLearning {
 			out.writeObject(Bot);
 			out.close();
 			fileOut.close();
-			System.out.printf("Serialized data is saved in /tmp/employee.ser");
+			System.out.println("Serialized data is saved in /tmp/employee.ser");
 		}catch(IOException i)
 		{
 			i.printStackTrace();
@@ -89,8 +87,8 @@ public class machineLearning {
 		distributionSet.add(new CategoricalDistribution(Table));
 		distributionSet.add(new CategoricalDistribution(Table));
 		Bot = new HMM(a.clone(),pi.clone(),distributionSet);
-		teacher = new BaumWelch(srcArr,Bot);
 
+		teacher = new BaumWelch(srcArr,Bot);
 		teacher.learn(100);
 
 		Maps = new File("HMMG"+(r++)+".txt");
@@ -102,27 +100,34 @@ public class machineLearning {
 			out.writeObject(Bot);
 			out.close();
 			fileOut.close();
-			System.out.printf("Serialized data is saved in /tmp/employee.ser");
+			System.out.println("Serialized data is saved in /tmp/employee.ser");
 		}catch(IOException i)
 		{
 			i.printStackTrace();
 		}
 
 		//sets up the distribution for portDstArr and than has it learn and write results to file 
-		Table = new HashMap<Observation,BigDecimal>(); 
+		//Table = new HashMap<Observation,BigDecimal>(); 
 		distributionSet = new ArrayList<Distribution>();
-		Table.put(new Observation(1),BigDecimal.valueOf(.333));
-		Table.put(new Observation(2),BigDecimal.valueOf(.333));
-		Table.put(new Observation(3),BigDecimal.valueOf(.333));
+		//Table.put(new Observation(1),BigDecimal.valueOf(.333));
+		//Table.put(new Observation(2),BigDecimal.valueOf(.333));
+		//Table.put(new Observation(3),BigDecimal.valueOf(.333));
+		BigDecimal[] C={new BigDecimal(.5),new BigDecimal(.5)};
+		Function[] F={new Gaussian(new BigDecimal(20),new BigDecimal(300)),
+				new Gaussian(new BigDecimal(1280),new BigDecimal(350))};
+		MixtureDistribution wave =new MixtureDistribution(C,F);
 
-		distributionSet.add(new CategoricalDistribution(Table));
-		distributionSet.add(new CategoricalDistribution(Table));
-		distributionSet.add(new CategoricalDistribution(Table));
+		distributionSet.add(wave);
+		distributionSet.add(wave);
+		distributionSet.add(wave);
+
+		//distributionSet.add(new CategoricalDistribution(Table));
+		//distributionSet.add(new CategoricalDistribution(Table));
+		//distributionSet.add(new CategoricalDistribution(Table));
 		Bot = new HMM(a.clone(),pi.clone(),distributionSet);
+
 		teacher = new BaumWelch(portDstArr,Bot);
-
 		teacher.learn(100);
-
 
 		Maps = new File("HMMG"+(r++)+".txt");
 		try
@@ -133,7 +138,7 @@ public class machineLearning {
 			out.writeObject(Bot);
 			out.close();
 			fileOut.close();
-			System.out.printf("Serialized data is saved in /tmp/employee.ser");
+			System.out.println("Serialized data is saved in /tmp/employee.ser");
 		}catch(IOException i)
 		{
 			i.printStackTrace();
@@ -163,13 +168,14 @@ public class machineLearning {
 			out.writeObject(Bot);
 			out.close();
 			fileOut.close();
-			System.out.printf("Serialized data is saved in /tmp/employee.ser");
+			System.out.println("Serialized data is saved in /tmp/employee.ser");
 		}catch(IOException i)
 		{
 			i.printStackTrace();
 		}
 
 		//sets up the distribution for tlArr and than has it learn and write results to file 
+
 		Table = new HashMap<Observation,BigDecimal>();
 		distributionSet = new ArrayList<Distribution>();
 		for(int y=0;y<2000;y++)
@@ -184,6 +190,7 @@ public class machineLearning {
 		teacher = new BaumWelch(portSrcArr,Bot);
 		teacher.learn(100);
 
+
 		Maps = new File("HMMG"+(r++)+".txt");
 		try
 		{
@@ -193,7 +200,7 @@ public class machineLearning {
 			out.writeObject(Bot);
 			out.close();
 			fileOut.close();
-			System.out.printf("Serialized data is saved in /tmp/employee.ser");
+			System.out.println("Serialized data is saved in /tmp/employee.ser");
 		}catch(IOException i)
 		{
 			i.printStackTrace();
@@ -214,8 +221,8 @@ public class machineLearning {
 		distributionSet.add(new CategoricalDistribution(Table));
 		distributionSet.add(new CategoricalDistribution(Table));
 		Bot = new HMM(a.clone(),pi.clone(),distributionSet);
-		teacher = new BaumWelch(dstArr,Bot);
 
+		teacher = new BaumWelch(dstArr,Bot);
 		teacher.learn(100);
 
 		Maps = new File("HMMB"+(r++)+".txt");
@@ -227,7 +234,7 @@ public class machineLearning {
 			out.writeObject(Bot);
 			out.close();
 			fileOut.close();
-			System.out.printf("Serialized data is saved in /tmp/employee.ser");
+			System.out.println("Serialized data is saved in /tmp/employee.ser");
 		}catch(IOException i)
 		{
 			i.printStackTrace();
@@ -243,8 +250,8 @@ public class machineLearning {
 		distributionSet.add(new CategoricalDistribution(Table));
 		distributionSet.add(new CategoricalDistribution(Table));
 		Bot = new HMM(a.clone(),pi.clone(),distributionSet);
-		teacher = new BaumWelch(srcArr,Bot);
 
+		teacher = new BaumWelch(srcArr,Bot);
 		teacher.learn(100);
 
 		Maps = new File("HMMB"+(r++)+".txt");
@@ -256,26 +263,38 @@ public class machineLearning {
 			out.writeObject(Bot);
 			out.close();
 			fileOut.close();
-			System.out.printf("Serialized data is saved in /tmp/employee.ser");
+			System.out.println("Serialized data is saved in /tmp/employee.ser");
 		}catch(IOException i)
 		{
 			i.printStackTrace();
 		}
 
 		//sets up the distribution for portDstArr and than has it learn and write results to file 
-		Table = new HashMap<Observation,BigDecimal>(); 
+		//Table = new HashMap<Observation,BigDecimal>(); 
 		distributionSet = new ArrayList<Distribution>();
-		Table.put(new Observation(1),BigDecimal.valueOf(.333));
-		Table.put(new Observation(2),BigDecimal.valueOf(.333));
-		Table.put(new Observation(3),BigDecimal.valueOf(.333));
+		//Table.put(new Observation(1),BigDecimal.valueOf(.333));
+		//Table.put(new Observation(2),BigDecimal.valueOf(.333));
+		//Table.put(new Observation(3),BigDecimal.valueOf(.333));
 
-		distributionSet.add(new CategoricalDistribution(Table));
-		distributionSet.add(new CategoricalDistribution(Table));
-		distributionSet.add(new CategoricalDistribution(Table));
+		//		distributionSet.add(new CategoricalDistribution(Table));
+		//	distributionSet.add(new CategoricalDistribution(Table));
+		//distributionSet.add(new CategoricalDistribution(Table));
+		BigDecimal[] C2={new BigDecimal(.5),new BigDecimal(.5)};
+		Function[] F2={new Gaussian(new BigDecimal(25),new BigDecimal(300)),
+				new Gaussian(new BigDecimal(540),new BigDecimal(250)),
+				new Gaussian(new BigDecimal(1480),new BigDecimal(250))};
+		wave =new MixtureDistribution(C2,F2);
+		
+		distributionSet.add(wave);
+		distributionSet.add(wave);
+		distributionSet.add(wave);
+		
 		Bot = new HMM(a.clone(),pi.clone(),distributionSet);
-		teacher = new BaumWelch(portDstArr,Bot);
 
+
+		teacher = new BaumWelch(portDstArr,Bot);
 		teacher.learn(100);
+
 
 		Maps = new File("HMMB"+(r++)+".txt");
 		try
@@ -286,7 +305,7 @@ public class machineLearning {
 			out.writeObject(Bot);
 			out.close();
 			fileOut.close();
-			System.out.printf("Serialized data is saved in /tmp/employee.ser");
+			System.out.println("Serialized data is saved in /tmp/employee.ser");
 		}catch(IOException i)
 		{
 			i.printStackTrace();
@@ -316,11 +335,12 @@ public class machineLearning {
 			out.writeObject(Bot);
 			out.close();
 			fileOut.close();
-			System.out.printf("Serialized data is saved in /tmp/employee.ser");
+			System.out.println("Serialized data is saved in /tmp/employee.ser");
 		}catch(IOException i)
 		{
 			i.printStackTrace();
 		}
+
 
 		//sets up the distribution for tlArr and than has it learn and write results to file 
 
@@ -328,12 +348,16 @@ public class machineLearning {
 		distributionSet = new ArrayList<Distribution>();
 		for(int y=0;y<2000;y++)
 		Table.put(new Observation(y+1),BigDecimal.valueOf(1./2000));
-		
 
+
+		distributionSet.add(new CategoricalDistribution(Table));
+		distributionSet.add(new CategoricalDistribution(Table));
+		distributionSet.add(new CategoricalDistribution(Table));
 		Bot = new HMM(a.clone(),pi.clone(),distributionSet);
+
 		teacher = new BaumWelch(portSrcArr,Bot);
 		teacher.learn(100);
-
+		
 		Maps = new File("HMMB"+(r++)+".txt");
 		try
 		{
@@ -343,7 +367,7 @@ public class machineLearning {
 			out.writeObject(Bot);
 			out.close();
 			fileOut.close();
-			System.out.printf("Serialized data is saved in /tmp/employee.ser");
+			System.out.println("Serialized data is saved in /tmp/employee.ser");
 		}catch(IOException i)
 		{
 			i.printStackTrace();
@@ -363,9 +387,11 @@ public class machineLearning {
 		distributionSet.add(new CategoricalDistribution(Table));
 		distributionSet.add(new CategoricalDistribution(Table));
 		Bot = new HMM(a.clone(),pi.clone(),distributionSet);
+
 		teacher = new BaumWelch(dstArr,Bot);
 
 		teacher.learn(100);
+
 
 		Maps = new File("HMMm"+(r++)+".txt");
 		try
@@ -376,7 +402,7 @@ public class machineLearning {
 			out.writeObject(Bot);
 			out.close();
 			fileOut.close();
-			System.out.printf("Serialized data is saved in /tmp/employee.ser");
+			System.out.println("Serialized data is saved in /tmp/employee.ser");
 		}catch(IOException i)
 		{
 			i.printStackTrace();
@@ -392,6 +418,7 @@ public class machineLearning {
 		distributionSet.add(new CategoricalDistribution(Table));
 		distributionSet.add(new CategoricalDistribution(Table));
 		Bot = new HMM(a.clone(),pi.clone(),distributionSet);
+
 		teacher = new BaumWelch(srcArr,Bot);
 
 		teacher.learn(100);
@@ -405,25 +432,33 @@ public class machineLearning {
 			out.writeObject(Bot);
 			out.close();
 			fileOut.close();
-			System.out.printf("Serialized data is saved in /tmp/employee.ser");
+			System.out.println("Serialized data is saved in /tmp/employee.ser");
 		}catch(IOException i)
 		{
 			i.printStackTrace();
 		}
 
 		//sets up the distribution for portDstArr and than has it learn and write results to file 
-		Table = new HashMap<Observation,BigDecimal>(); 
+		//Table = new HashMap<Observation,BigDecimal>(); 
 		distributionSet = new ArrayList<Distribution>();
-		Table.put(new Observation(1),BigDecimal.valueOf(.333));
-		Table.put(new Observation(2),BigDecimal.valueOf(.333));
-		Table.put(new Observation(3),BigDecimal.valueOf(.333));
-
-		distributionSet.add(new CategoricalDistribution(Table));
-		distributionSet.add(new CategoricalDistribution(Table));
-		distributionSet.add(new CategoricalDistribution(Table));
+	//	Table.put(new Observation(1),BigDecimal.valueOf(.333));
+		//Table.put(new Observation(2),BigDecimal.valueOf(.333));
+	//Table.put(new Observation(3),BigDecimal.valueOf(.333));
+		BigDecimal[] C3={new BigDecimal(.5),new BigDecimal(.5)};
+		Function[] F3={new Gaussian(new BigDecimal(25),new BigDecimal(200)),
+				new Gaussian(new BigDecimal(510),new BigDecimal(300)),
+				new Gaussian(new BigDecimal(1290),new BigDecimal(350))};
+		wave =new MixtureDistribution(C3,F3);
+		
+		distributionSet.add(wave);
+		distributionSet.add(wave);
+		distributionSet.add(wave);
+		//distributionSet.add(new CategoricalDistribution(Table));
+		//distributionSet.add(new CategoricalDistribution(Table));
+		//distributionSet.add(new CategoricalDistribution(Table));
 		Bot = new HMM(a.clone(),pi.clone(),distributionSet);
-		teacher = new BaumWelch(portDstArr,Bot);
 
+		teacher = new BaumWelch(portDstArr,Bot);
 		teacher.learn(100);
 
 		Maps = new File("HMMm"+(r++)+".txt");
@@ -435,7 +470,7 @@ public class machineLearning {
 			out.writeObject(Bot);
 			out.close();
 			fileOut.close();
-			System.out.printf("Serialized data is saved in /tmp/employee.ser");
+			System.out.println("Serialized data is saved in /tmp/employee.ser");
 		}catch(IOException i)
 		{
 			i.printStackTrace();
@@ -465,7 +500,7 @@ public class machineLearning {
 			out.writeObject(Bot);
 			out.close();
 			fileOut.close();
-			System.out.printf("Serialized data is saved in /tmp/employee.ser");
+			System.out.println("Serialized data is saved in /tmp/employee.ser");
 		}catch(IOException i)
 		{
 			i.printStackTrace();
@@ -473,13 +508,20 @@ public class machineLearning {
 
 		//sets up the distribution for tlArr and than has it learn and write results to file 
 
+
 		Table = new HashMap<Observation,BigDecimal>();
 		distributionSet = new ArrayList<Distribution>();
 		for(int y=0;y<2000;y++)
 		Table.put(new Observation(y+1),BigDecimal.valueOf(1./2000));
 		
 
+
+
+		distributionSet.add(new CategoricalDistribution(Table));
+		distributionSet.add(new CategoricalDistribution(Table));
+		distributionSet.add(new CategoricalDistribution(Table));
 		Bot = new HMM(a.clone(),pi.clone(),distributionSet);
+
 		teacher = new BaumWelch(portSrcArr,Bot);
 		teacher.learn(100);
 
@@ -492,7 +534,7 @@ public class machineLearning {
 			out.writeObject(Bot);
 			out.close();
 			fileOut.close();
-			System.out.printf("Serialized data is saved in /tmp/employee.ser");
+			System.out.println("Serialized data is saved in /tmp/employee.ser");
 		}catch(IOException i)
 		{
 			i.printStackTrace();
