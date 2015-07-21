@@ -134,12 +134,15 @@ public class BaumWelch extends ForwardBackward {
 		return c.divide(temp,MathContext.DECIMAL128);
 	}
 	//updates each of the major properties of the hidden Markov model 
+	
 	public void updateDiscrete(){
 		BigDecimal[] tpi = new BigDecimal[Model.getNumStates()];//holds the temporary pi
 		ttrans = new BigDecimal[Model.getNumStates()][Model.getNumStates()];//holds the temporary transition matrix 
 		b = new ArrayList<Distribution>();//holds the temporary emission functions
 		//sets pi for all states to the probability of observing the first element in the training sequence 
 		//initializes the normalizing coefficient for all states 
+		Thread emit = new Thread(this);
+		Thread trans = new Thread(this);
 		for(int x = 0;x < Model.getNumStates();x++ ){
 			tpi[x] =this.gammaDiscrete[x][0];
 			sumA[x] = new BigDecimal(0);
@@ -148,7 +151,7 @@ public class BaumWelch extends ForwardBackward {
 		//updates the transition matrix
 		
 		job = 4;
-		Thread trans = new Thread(this);
+		
 		trans.start();
 		try {
 			Thread.sleep(200);
@@ -159,7 +162,7 @@ public class BaumWelch extends ForwardBackward {
 		
 		//updates the transition matrix 
 		job = 5;
-		Thread emit = new Thread(this);
+		
 		emit.start();
 		try {
 			Thread.sleep(200);
@@ -167,7 +170,20 @@ public class BaumWelch extends ForwardBackward {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		
+		try {
+			trans.join();
+			emit.join();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			trans.join();
+			emit.join();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		Model.setPi(tpi);
 		Model.setA(ttrans);
 		Model.setB(b);
@@ -204,6 +220,7 @@ public class BaumWelch extends ForwardBackward {
 
 	}
 	// make conditional for learn() for udateDiscrete() vs updateContinuous().
+	
 	public void learn(int itr){
 		for(int x = 0;x < itr; x++){
 			logLikelyHood = new BigDecimal(0);
@@ -214,7 +231,10 @@ public class BaumWelch extends ForwardBackward {
 			gammaContinuous =  new BigDecimal[Model.getNumStates()][trainingSet.size()][Model.getNumMixtureComponents()];
 			xi = new BigDecimal[Model.getNumStates()][Model.getNumStates()][trainingSet.size()];
 			alphaTimesBeta  = new BigDecimal[trainingSet.size()];
-
+			Thread forward = new Thread(this);
+			Thread back = new Thread(this);
+			Thread gamma = new Thread(this);
+			Thread xiThread = new Thread(this);
 			for(int i = 0;i < Model.getNumStates();i++)
 				for(int t = 0;t < trainingSet.size();t++){
 					alpha[i][t] = new BigDecimal(0.);
@@ -224,7 +244,7 @@ public class BaumWelch extends ForwardBackward {
 				}
 
 			job = 0;
-			Thread forward = new Thread(this);
+			
 			forward.start();
 			try {
 				Thread.sleep(200);
@@ -233,7 +253,7 @@ public class BaumWelch extends ForwardBackward {
 				e1.printStackTrace();
 			}
 			job = 1;
-			Thread back = new Thread(this);
+			
 			back.start();
 
 			try {
@@ -251,7 +271,7 @@ public class BaumWelch extends ForwardBackward {
 				e.printStackTrace();
 			}
 			job = 2;
-			Thread gamma = new Thread(this);
+			
 			gamma.start();
 			try {
 				Thread.sleep(200);
@@ -260,11 +280,11 @@ public class BaumWelch extends ForwardBackward {
 				e1.printStackTrace();
 			}
 			job = 3;
-			Thread xi = new Thread(this);
-			xi.start();
+		
+			xiThread.start();
 			try {
 				gamma.join();
-				xi.join();
+				xiThread.join();
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
