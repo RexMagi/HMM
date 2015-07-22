@@ -37,8 +37,6 @@ public class DataCollection {
 	
 	}
 	
-	
-	
 	public static void orgTypes(ArrayList<ArrayList<Object>>  arr) throws IOException {
 		for (int i = 0; i < arr.size() ; i++) {
 			write.write(((Integer) arr.get(i).get(0)).toString());
