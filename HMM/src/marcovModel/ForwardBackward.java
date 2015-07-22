@@ -18,7 +18,9 @@ public class ForwardBackward implements Runnable  {
 	volatile int job;
 	volatile BigDecimal gammaSum[];
 	volatile BigDecimal alphaTimesBeta[];
-	ArrayList<ArrayList<BigDecimal>> memoryArr;
+	ArrayList<ArrayList<BigDecimal>> memoryArrAlpha;
+	ArrayList<ArrayList<BigDecimal>> memoryArrBeta;
+	ArrayList<ArrayList<BigDecimal>> memoryArrGamma;
 	ArrayList<Observation> trainingSet;//the set being iterated over
 	HMM Model;//the hidden markov model
 	BigDecimal c[];//the scaling coefficient used to scale the alpha and beta values when they might become to small 
@@ -34,6 +36,7 @@ public class ForwardBackward implements Runnable  {
 		//loops through all states and caches alpha values
 		for(int t = 0;t < trainingSet.size() ;t++)
 			for(int i = 0;i < Model.getNumStates();i++)	{
+				System.out.println(c.length);
 				if(c[t] == null){
 					c[t] = new BigDecimal(0);
 				}
@@ -44,6 +47,7 @@ public class ForwardBackward implements Runnable  {
 				if(t == 0){
 					//sets alpha at time 1 to pi for that state times the probability of
 					//y1 given state i
+					//System.out.println(trainingSet.get(t));
 					alpha[i][t] = Model.getPi(i).multiply
 							(Model.pdf(i,trainingSet.get(t)));
 				}else {	
@@ -120,6 +124,19 @@ public class ForwardBackward implements Runnable  {
 		}
 		return temp.divide(temp2,MathContext.DECIMAL128);
 	}
+	
+	public BigDecimal gamma(int i){
+		int t =  trainingSet.size() - 1;
+		BigDecimal temp = alpha[i][t].multiply(beta[i][t]);
+		BigDecimal temp2 = new BigDecimal(0.);
+		//sums alpha time beta for all states given t
+		for(int x = 0;x < Model.getNumStates();x++){
+			temp2=temp2.add(alpha[x][t].multiply(beta[x][t]));
+		}
+		if(temp.compareTo(BigDecimal.valueOf(0))==0)
+			return temp.divide(BigDecimal.valueOf(.000000000001),MathContext.DECIMAL128);
+		return temp.divide(temp2,MathContext.DECIMAL128);
+	}
 	public BigDecimal gamma(int i, int j ,int t){
 		BigDecimal temp = alpha[i][t].multiply(beta[i][t]);
 		BigDecimal temp2 = new BigDecimal(0); 
@@ -172,8 +189,8 @@ public class ForwardBackward implements Runnable  {
 
 	public void alpha(Observation x){
 		ArrayList<BigDecimal> memAlphas = new ArrayList<BigDecimal>();
-		if (memoryArr == null) {
-			memoryArr = new ArrayList<ArrayList<BigDecimal>>();
+		if (memoryArrAlpha == null) {
+			memoryArrAlpha = new ArrayList<ArrayList<BigDecimal>>();
 			//sets alpha at time 1 to pi for that state times the probability of
 			//y1 given state i
 			for (int i = 0; i < 3; i++) 
@@ -189,11 +206,11 @@ public class ForwardBackward implements Runnable  {
 				memAlphas.add( Model.pdf(i,x).multiply(temp));
 			}
 		}
-		memoryArr.add(memAlphas);
+		memoryArrAlpha.add(memAlphas);
 	}
 
 	public ArrayList<BigDecimal> getLastMemArr() {
-		return memoryArr.get(memoryArr.size() - 1);
+		return memoryArrAlpha.get(memoryArrAlpha.size() - 1);
 	}
 
 	@Override

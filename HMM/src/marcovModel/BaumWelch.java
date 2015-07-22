@@ -35,12 +35,42 @@ public class BaumWelch extends ForwardBackward {
 		q++;
 
 		try {
-			states = new PrintWriter("States"+q+".txt", "UTF-8");
-			LikelyHood = new PrintWriter("LiklyHood"+q+".txt", "UTF-8");
+			states = new PrintWriter("StatesSM"+q+".txt", "UTF-8");
+			LikelyHood = new PrintWriter("LiklyHoodSM"+q+".txt", "UTF-8");
 		} catch (FileNotFoundException | UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
+		
+		
+		
 	}
+	public BaumWelch(ArrayList<Observation> trainingSet, HMM model,char x) {
+		super(trainingSet, model);
+		
+		
+	}
+
+	public void init(){
+		logLikelyHood = new BigDecimal(0);
+		alpha = new BigDecimal[Model.getNumStates()][trainingSet.size()];
+		beta = new BigDecimal[Model.getNumStates()][trainingSet.size()];	
+		gammaSum = new BigDecimal[Model.getNumStates()];
+		gammaDiscrete = new BigDecimal[Model.getNumStates()][trainingSet.size()];
+		gammaContinuous =  new BigDecimal[Model.getNumStates()][trainingSet.size()][Model.getNumMixtureComponents()];
+		xi = new BigDecimal[Model.getNumStates()][Model.getNumStates()][trainingSet.size()];
+		alphaTimesBeta  = new BigDecimal[trainingSet.size()];
+		
+		for(int i = 0;i < Model.getNumStates();i++)
+			for(int t = 0;t < trainingSet.size();t++){
+				alpha[i][t] = new BigDecimal(0.);
+				beta[i][t] = new BigDecimal(0.);
+				gammaSum[i] = new BigDecimal(0.);
+				alphaTimesBeta[t] = new BigDecimal(0.);
+			}		
+	}
+	
+	
+	
 	//updates the probability form going form state i to j
 	//equation 
 	//a_i_j = expected number of transitions form state i to j/ expected number of transitions from state i
@@ -298,7 +328,7 @@ public class BaumWelch extends ForwardBackward {
 
 			LikelyHood.println(((logLikelyHood.doubleValue())) );
 			states.println(Model);
-			System.out.println(Model);
+			//System.out.println(Model);
 		}
 
 		LikelyHood.flush();
