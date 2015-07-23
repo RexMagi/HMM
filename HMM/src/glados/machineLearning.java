@@ -1,8 +1,10 @@
 package glados;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -22,13 +24,13 @@ public class machineLearning {
 	public static ArrayList<Observation> portDstArr = new ArrayList<Observation>();
 	public static ArrayList<Observation> portSrcArr = new ArrayList<Observation>();
 
-	static PcapReader Good = new PcapReader("C:\\Users\\Lab User\\Desktop\\SCAN_merge.pcap");
+	
 //	static PcapReader Bad = new PcapReader("C:\\Users\\Lab User\\Downloads\\Bad.pcap");
 //static PcapReader both = new PcapReader("C:\\Users\\Lab User\\Downloads\\Mix.pcap");
 
 	public static void main(String[] args) throws IOException {
 
-		int r = 0; 
+		
 		File Maps;
 		ArrayList<Distribution> distributionSet = new ArrayList<Distribution>();
 		HMM Bot;
@@ -38,15 +40,20 @@ public class machineLearning {
 				{new BigDecimal(0.35,MathContext.DECIMAL32),new BigDecimal(0.5,MathContext.DECIMAL32),new BigDecimal(0.15,MathContext.DECIMAL32)},
 				{new BigDecimal(0.15,MathContext.DECIMAL32),new BigDecimal(0.33,MathContext.DECIMAL32),new BigDecimal(0.55,MathContext.DECIMAL32)}
 		};
-
+		HashMap<Observation,BigDecimal> Table;
 		BigDecimal [] pi = {new BigDecimal(0.7,MathContext.DECIMAL32),new BigDecimal(0.2,MathContext.DECIMAL32),new BigDecimal(.1)};
-
-		Good.loop(100000);
+		String x[] ={"Scan_Exp_Mal"};
+		
+		for(int s = 0; s < x.length;s++){
+			int r = 0; 
+		PcapReader Good = new PcapReader("C:\\Users\\Lab User\\Desktop\\"+x[s] +".pcap");
+		Good.loop(12);
 		orgTypes(Good.getPacketData());
 		Good.packetData=null;
-
+		Bot = reLoad(r);
+		if (Bot == null){
 		//sets up the distribution for dstArr and than has it learn and write results to file 
-		HashMap<Observation,BigDecimal> Table = new HashMap<Observation,BigDecimal>();
+		 Table = new HashMap<Observation,BigDecimal>();
 		distributionSet = new ArrayList<Distribution>();
 		Table.put(new Observation(1),BigDecimal.valueOf(.5));
 		Table.put(new Observation(2),BigDecimal.valueOf(.5));
@@ -55,12 +62,12 @@ public class machineLearning {
 		distributionSet.add(new CategoricalDistribution(Table));
 		distributionSet.add(new CategoricalDistribution(Table));
 		Bot = new HMM(a.clone(),pi.clone(),distributionSet);
-
+		}
 		teacher = new BaumWelch(srcArr,Bot);
 
 		teacher.learn(100);
 
-		Maps = new File("HMMSM"+(r++)+".txt");
+		Maps = new File("HMM.5"+(r++)+".txt");
 		try
 		{
 			FileOutputStream fileOut =
@@ -75,6 +82,8 @@ public class machineLearning {
 			i.printStackTrace();
 		}
 
+		Bot = reLoad(r);
+		if (Bot == null){
 		//sets up the distribution for srcArr and than has it learn and write results to file 
 		Table = new HashMap<Observation,BigDecimal>(); 
 		distributionSet = new ArrayList<Distribution>();
@@ -85,11 +94,12 @@ public class machineLearning {
 		distributionSet.add(new CategoricalDistribution(Table));
 		distributionSet.add(new CategoricalDistribution(Table));
 		Bot = new HMM(a.clone(),pi.clone(),distributionSet);
-
+		}
+		
 		teacher = new BaumWelch(dstArr,Bot);
 		teacher.learn(100);
 
-		Maps = new File("HMMSM"+(r++)+".txt");
+		Maps = new File("HMM.5"+(r++)+".txt");
 		try
 		{
 			FileOutputStream fileOut =
@@ -104,6 +114,8 @@ public class machineLearning {
 			i.printStackTrace();
 		}
 
+		Bot = reLoad(r);
+		if (Bot == null){
 		//sets up the distribution for portDstArr and than has it learn and write results to file 
 		Table = new HashMap<Observation,BigDecimal>(); 
 		distributionSet = new ArrayList<Distribution>();
@@ -122,11 +134,12 @@ public class machineLearning {
 		distributionSet.add(new CategoricalDistribution(Table));
 		distributionSet.add(new CategoricalDistribution(Table));
 		Bot = new HMM(a.clone(),pi.clone(),distributionSet);
-
+		}
+		
 		teacher = new BaumWelch(tlArr,Bot);
 		teacher.learn(100);
 
-		Maps = new File("HMMSM"+(r++)+".txt");
+		Maps = new File("HMM.5"+(r++)+".txt");
 		try
 		{
 			FileOutputStream fileOut =
@@ -141,6 +154,8 @@ public class machineLearning {
 			i.printStackTrace();
 		}
 
+		Bot = reLoad(r);
+		if (Bot == null){
 		//sets up the distribution for portSrcArr and than has it learn and write results to file 
 		Table = new HashMap<Observation,BigDecimal>(); 
 		distributionSet = new ArrayList<Distribution>();
@@ -153,10 +168,10 @@ public class machineLearning {
 		distributionSet.add(new CategoricalDistribution(Table));
 		Bot = new HMM(a.clone(),pi.clone(),distributionSet);
 		teacher = new BaumWelch(portSrcArr,Bot);
-
+		}
 		teacher.learn(100);
 
-		Maps = new File("HMMSM"+(r++)+".txt");
+		Maps = new File("HMM.5"+(r++)+".txt");
 		try
 		{
 			FileOutputStream fileOut =
@@ -171,6 +186,8 @@ public class machineLearning {
 			i.printStackTrace();
 		}
 
+		Bot = reLoad(r);
+		if (Bot == null){
 		//sets up the distribution for tlArr and than has it learn and write results to file 
 		Table = new HashMap<Observation,BigDecimal>(); 
 		distributionSet = new ArrayList<Distribution>();
@@ -182,12 +199,13 @@ public class machineLearning {
 		distributionSet.add(new CategoricalDistribution(Table));
 		distributionSet.add(new CategoricalDistribution(Table));
 		Bot = new HMM(a.clone(),pi.clone(),distributionSet);
-	
+		}
+		
 		teacher = new BaumWelch(portDstArr,Bot);
 		teacher.learn(100);
 
 
-		Maps = new File("HMMSM"+(r++)+".txt");
+		Maps = new File("HMM.5"+(r++)+".txt");
 		try
 		{
 			FileOutputStream fileOut =
@@ -203,7 +221,7 @@ public class machineLearning {
 		}
 
 
-
+		}
 
 
 	}
@@ -230,5 +248,19 @@ public class machineLearning {
 
 	
 	}
-
+	public static HMM reLoad(int x){
+	HMM temp = null;
+		try{
+			FileInputStream fileIn = new FileInputStream("HMM.5"+x+".txt");
+			ObjectInputStream in = new ObjectInputStream(fileIn);
+			temp = (HMM) in.readObject();
+			in.close();
+			fileIn.close();
+	}catch(IOException|ClassNotFoundException i)
+	{
+		return temp;
+	}
+		return temp;
+	
+	}
 }

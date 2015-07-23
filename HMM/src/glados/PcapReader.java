@@ -1,20 +1,31 @@
 package glados;
 
-
 import java.util.ArrayList;
 import java.util.HashMap;
+
 import org.jnetpcap.Pcap;
 import org.jnetpcap.packet.JPacket;
 import org.jnetpcap.packet.JPacketHandler;
+import org.jnetpcap.protocol.lan.Ethernet;
+import org.jnetpcap.protocol.network.Arp;
 import org.jnetpcap.protocol.network.Ip4;
 import org.jnetpcap.protocol.network.Ip6;
 import org.jnetpcap.protocol.tcpip.Tcp;
+import org.jnetpcap.protocol.tcpip.Udp;
+
+
+
 
 public class PcapReader implements JPacketHandler<StringBuilder>{
 	String fileName;// name of file that contains data
 	Pcap pcap  ; //instance of pcap data manipulator
 	final Tcp tcp = new Tcp();  
+	final Udp udp = new Udp();
 	final Ip4 ipv4 = new Ip4();
+	final Arp arp = new Arp();
+	
+	final Ethernet eth = new Ethernet();
+	public int count = 0;
 	final Ip6 ipv6 = new Ip6();	
 	final StringBuilder errbuf = new StringBuilder();// error buffer
 	ArrayList<ArrayList<Object>> packetData= new ArrayList<ArrayList<Object>>() ;
@@ -235,6 +246,7 @@ public class PcapReader implements JPacketHandler<StringBuilder>{
 	@Override
 	public void nextPacket(JPacket packet, StringBuilder errbuf) {
 		ArrayList<Object> pckt = new ArrayList<Object>() ;
+
 		/* 
 		 * Here we receive 1 packet at a time from the capture file. We are 
 		 * going to check if we have a tcp packet and do something with tcp 
@@ -243,15 +255,21 @@ public class PcapReader implements JPacketHandler<StringBuilder>{
 		 * then get that header (peer header definition instance with memory in 
 		 * the packet) in 2 separate steps. 
 		 */  
-
+//		System.out.print("Icmp:");
+//		System.out.println(packet.hasHeader(Icmp.ID));
+//		System.out.println(packet.hasHeader(Rip.ID));
+//		System.out.print("IPv4:");
+//		System.out.println(packet.hasHeader(Ip4.ID));
+//		System.out.println();
 		if (packet.hasHeader(Ip4.ID)) {  
-
 			/* 
 			 * Now get our tcp header definition (accessor) peered with actual 
 			 * memory that holds the tcp header within the packet. 
-			 */  
+			 */
 			packet.getHeader(ipv4);
 			packet.getHeader(tcp); 
+			packet.getHeader(eth); 
+			packet.getHeader(udp); 
 			int prefix = (ipv4.destination()[0]&0xFF);
 			int middle = (ipv4.destination()[1]&0xFF);
 
@@ -269,10 +287,15 @@ public class PcapReader implements JPacketHandler<StringBuilder>{
 				pckt.add(1);//private
 			else
 				pckt.add(2);//public
-
-			pckt.add(new Integer(ipv4.getPayload().length)); 
+		
+		
+			pckt.add(new Integer(eth.getPayloadLength())); 
 			Integer temp;
+			
+			if(packet.hasHeader(Tcp.ID)){
+			
 			try{
+			//	System.out.println(tcp.destination());
 			 temp = portMap.get(tcp.destination());
 			 
 			if (temp == null)
@@ -285,6 +308,7 @@ public class PcapReader implements JPacketHandler<StringBuilder>{
 			}
 			
 			try{
+				//System.out.println(tcp.source());
 			temp= portMap.get(tcp.source());
 			
 			if (temp == null)
@@ -294,9 +318,45 @@ public class PcapReader implements JPacketHandler<StringBuilder>{
 			}catch(NullPointerException e){
 				
 				pckt.add(2);
-			}
+			}}
+			
+			 if(packet.hasHeader(Udp.ID)){
+				
+				try{
+				//	System.out.println(tcp.destination());
+				 temp = portMap.get(udp.destination());
+				 
+				if (temp == null)
+					pckt.add(2);
+				else 
+					pckt.add(temp);
+				}catch(NullPointerException e){
+					
+					pckt.add(2);
+				}
+				
+				try{
+					//System.out.println(tcp.source());
+				temp= portMap.get(udp.source());
+				
+				if (temp == null)
+					pckt.add(2);
+				else 
+					pckt.add(temp);
+				}catch(NullPointerException e){
+					
+					pckt.add(2);
+				}}
+			
+					if(pckt.size() == 3){
+						temp = 3;
+						pckt.add(temp);
+						pckt.add(temp);
+					}
+				
 			packetData.add(pckt);
 		}
+		
 	}
 	/**
 	  @return the fileName

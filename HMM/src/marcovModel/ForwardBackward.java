@@ -10,14 +10,14 @@ import distributions.Observation;
 
 
 public class ForwardBackward implements Runnable  {
-	volatile BigDecimal alpha[][];//should be set to [number of states][size of training set-1]
-	volatile BigDecimal beta[][];//should be set to [number of states][size of training set-1]
-	volatile BigDecimal gammaDiscrete[][];//should be set to [number of states][size of training set-1]
-	volatile BigDecimal gammaContinuous[][][];
-	volatile BigDecimal xi[][][];//should be set to [number of states][size of training set-1]
-	volatile int job;
-	volatile BigDecimal gammaSum[];
-	volatile BigDecimal alphaTimesBeta[];
+	BigDecimal alpha[][];//should be set to [number of states][size of training set-1]
+	BigDecimal beta[][];//should be set to [number of states][size of training set-1]
+	BigDecimal gammaDiscrete[][];//should be set to [number of states][size of training set-1]
+	BigDecimal gammaContinuous[][][];
+	BigDecimal xi[][][];//should be set to [number of states][size of training set-1]
+	int job;
+	BigDecimal gammaSum[];
+	BigDecimal alphaTimesBeta[];
 	ArrayList<ArrayList<BigDecimal>> memoryArrAlpha;
 	ArrayList<ArrayList<BigDecimal>> memoryArrBeta;
 	ArrayList<ArrayList<BigDecimal>> memoryArrGamma;
@@ -31,19 +31,13 @@ public class ForwardBackward implements Runnable  {
 		this.trainingSet = Observation;
 		Model = model;
 	}
+	
 	public void forward(){
-		c = new BigDecimal[trainingSet.size()];	
 		//loops through all states and caches alpha values
 		for(int t = 0;t < trainingSet.size() ;t++)
 			for(int i = 0;i < Model.getNumStates();i++)	{
-				System.out.println(c.length);
-				if(c[t] == null){
-					c[t] = new BigDecimal(0);
-				}
-				if( t!= 0){
-					logLikelyHood = logLikelyHood.add(c[t-1],MathContext.DECIMAL128);
 
-				}
+
 				if(t == 0){
 					//sets alpha at time 1 to pi for that state times the probability of
 					//y1 given state i
@@ -58,14 +52,25 @@ public class ForwardBackward implements Runnable  {
 					//sets alpha for state i at time x to  emission for state i 
 					//for observation x times the sum of the previous alpha in all states times the 
 					//Probability all previous states leads to the current state
+//					System.out.println(t);
+//					System.out.println(alpha[0].length);
+//					System.out.println(beta[0].length);
+//					System.out.println(i);
+//					System.out.println(trainingSet.size()); 
+//					System.out.println("------------------------");
+//					
+//					System.out.println("------------------------");
+//					System.out.println(alpha.length);
+//					System.out.println(alpha[i].length);
+//					System.out.println("------------------------");
 					alpha[i][t] = Model.pdf(i,trainingSet.get(t)).multiply(
 							temp);
 				}
 
-				c[t] = c[t].add(alpha[i][t]);	
 			} 
 
 	}
+	
 	public void back(){
 		//loops through all states and caches the beta values for those states
 		for(int t = trainingSet.size() - 1;t >= 0;t--)
@@ -91,11 +96,18 @@ public class ForwardBackward implements Runnable  {
 					//times the probability all states transition to this state
 					//times the probability that all states emit the next observed data
 					beta[i][t] = temp;	
-					alphaTimesBeta[t] =alphaTimesBeta[t].add(beta[i][t].multiply(alpha[i][t]));
+
 				}
-				
+
 			}
 	}
+
+	public void denomSum(){
+		for(int t = trainingSet.size() - 1;t >= 0;t--)
+			for(int i = 0;i < Model.getNumStates();i++)
+				alphaTimesBeta[t] = alphaTimesBeta[t].add(beta[i][t].multiply(alpha[i][t]));
+	}
+
 	public void gamma(){
 		for(int i = 0; i < Model.getNumStates();i++)
 			for(int t = 0; t < trainingSet.size(); t++){
@@ -124,15 +136,20 @@ public class ForwardBackward implements Runnable  {
 		}
 		return temp.divide(temp2,MathContext.DECIMAL128);
 	}
-	
+
 	public BigDecimal gamma(int i){
 		int t =  trainingSet.size() - 1;
-		BigDecimal temp = alpha[i][t].multiply(beta[i][t]);
+		BigDecimal temp = new BigDecimal(0);
+		
+	
+			temp = alpha[i][t].multiply(beta[i][t]);	
+
 		BigDecimal temp2 = new BigDecimal(0.);
 		//sums alpha time beta for all states given t
 		for(int x = 0;x < Model.getNumStates();x++){
 			temp2=temp2.add(alpha[x][t].multiply(beta[x][t]));
 		}
+
 		if(temp.compareTo(BigDecimal.valueOf(0))==0)
 			return temp.divide(BigDecimal.valueOf(.000000000001),MathContext.DECIMAL128);
 		return temp.divide(temp2,MathContext.DECIMAL128);
@@ -182,7 +199,7 @@ public class ForwardBackward implements Runnable  {
 		}
 
 		//System.out.println(temp.divide(temp2,MathContext.DECIMAL128));
-	
+
 		return temp.divide(temp2,MathContext.DECIMAL128);
 	}
 
