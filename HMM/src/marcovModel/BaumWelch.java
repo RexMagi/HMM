@@ -63,7 +63,7 @@ public class BaumWelch extends ForwardBackward {
 			}		
 	}
 
-	public BigDecimal inferance(BigDecimal cost){
+	public BigDecimal inferance(){
 		BigDecimal risk = new BigDecimal(0);
 		init();
 		Thread forward = new Thread(this);
@@ -90,8 +90,8 @@ public class BaumWelch extends ForwardBackward {
 		}
 		
 		for (int i=0;i<Model.getNumStates();i++)
-			risk = risk.add(gamma(i));
-		return risk.max(cost);
+			risk = risk.add(gamma(i)).multiply(BigDecimal.valueOf(i/2.));
+		return risk;
 	}
 
 
