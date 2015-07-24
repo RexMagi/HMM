@@ -28,7 +28,7 @@ public class PcapReader implements JPacketHandler<StringBuilder>{
 	public int count = 0;
 	final Ip6 ipv6 = new Ip6();	
 	final StringBuilder errbuf = new StringBuilder();// error buffer
-	ArrayList<ArrayList<Object>> packetData= new ArrayList<ArrayList<Object>>() ;
+	ArrayList<ArrayList<Object>> packetData= new ArrayList<>() ;
 	HashMap<Integer, Integer> portMap = new HashMap<Integer, Integer>();
 
 	//takes in a file and opens a file reader stream from pcap manipulator

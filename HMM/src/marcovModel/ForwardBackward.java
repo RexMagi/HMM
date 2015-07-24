@@ -45,7 +45,7 @@ public class ForwardBackward implements Runnable  {
 					alpha[i][t] = Model.getPi(i).multiply
 							(Model.pdf(i,trainingSet.get(t)));
 				}else {	
-					BigDecimal temp = new BigDecimal(0.);
+					BigDecimal temp = new BigDecimal(0);
 					for(int j = 0;j < Model.getNumStates();j++){
 						temp = temp.add(alpha[j][t-1].multiply(Model.getA(j,i),MathContext.DECIMAL128));
 					}
@@ -83,13 +83,11 @@ public class ForwardBackward implements Runnable  {
 
 				}
 				else{
-					BigDecimal temp = new BigDecimal(0.);
+					BigDecimal temp = new BigDecimal(0);
 					for(int j = 0;j < Model.getNumStates();j++){
 						temp = temp.add(beta[j][t+1].multiply(
 								Model.getA(i,j).multiply(
-										Model.pdf(j,trainingSet.get(t+1))
-										,MathContext.DECIMAL128)
-										,MathContext.DECIMAL128));
+										Model.pdf(j,trainingSet.get(t+1)))));
 					}
 					//sets beta for state i at time x to 
 					//the sum of all the next beta values for all states
@@ -142,12 +140,12 @@ public class ForwardBackward implements Runnable  {
 		BigDecimal temp = new BigDecimal(0);
 		
 	
-			temp = alpha[i][t].multiply(beta[i][t]);	
+			temp = alpha[i][t];	
 
 		BigDecimal temp2 = new BigDecimal(0.);
 		//sums alpha time beta for all states given t
 		for(int x = 0;x < Model.getNumStates();x++){
-			temp2=temp2.add(alpha[x][t].multiply(beta[x][t]));
+			temp2=temp2.add(alpha[x][t]);
 		}
 
 		if(temp.compareTo(BigDecimal.valueOf(0))==0)

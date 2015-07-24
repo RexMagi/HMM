@@ -52,25 +52,25 @@ public class BaumWelch extends ForwardBackward {
 	public void init(){
 
 		alpha = new BigDecimal[Model.getNumStates()][trainingSet.size()];
-		beta = new BigDecimal[Model.getNumStates()][trainingSet.size()];	
+		//beta = new BigDecimal[Model.getNumStates()][trainingSet.size()];	
 
 		for(int i = 0;i < Model.getNumStates();i++)
 			for(int t = 0;t < trainingSet.size();t++){
 				alpha[i][t] = new BigDecimal(0.);
-				beta[i][t] = new BigDecimal(0.);
-				gammaSum[i] = new BigDecimal(0.);
-				alphaTimesBeta[t] = new BigDecimal(0.);
+				//	beta[i][t] = new BigDecimal(0.);
+
 			}		
 	}
 
-	public BigDecimal inferance(){
-		BigDecimal risk = new BigDecimal(0);
+	public double inferance(){
+		BigDecimal risk ;
+		double tally = 0;
 		init();
 		Thread forward = new Thread(this);
 		Thread back = new Thread(this);
 		job = 0;
 
-		forward.start();
+		forward.start();;
 		try {
 			Thread.sleep(1);
 		} catch (InterruptedException e1) {
@@ -89,9 +89,14 @@ public class BaumWelch extends ForwardBackward {
 			e.printStackTrace();
 		}
 		
-		for (int i=0;i<Model.getNumStates();i++)
-			risk = risk.add(gamma(i)).multiply(BigDecimal.valueOf(i/2.));
-		return risk;
+		for(int t = 0; t < trainingSet.size(); t++){
+			risk = new BigDecimal(0);
+			for (int i = 0;i < Model.getNumStates(); i++)
+				risk = risk.add(gamma(i,t)).multiply(BigDecimal.valueOf(i/2.));
+			if(risk.compareTo(BigDecimal.valueOf(.75)) == 1)
+				tally++;
+		}
+		return tally/this.trainingSet.size();
 	}
 
 
