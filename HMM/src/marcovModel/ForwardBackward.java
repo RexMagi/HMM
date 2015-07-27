@@ -42,6 +42,7 @@ public class ForwardBackward implements Runnable  {
 					//sets alpha at time 1 to pi for that state times the probability of
 					//y1 given state i
 					//System.out.println(trainingSet.get(t));
+					//System.out.println(Model.pdf(i,trainingSet.get(t)));
 					alpha[i][t] = Model.getPi(i).multiply
 							(Model.pdf(i,trainingSet.get(t)));
 				}else {	

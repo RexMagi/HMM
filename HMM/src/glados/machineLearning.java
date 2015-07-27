@@ -42,12 +42,14 @@ public class machineLearning {
 		};
 		HashMap<Observation,BigDecimal> Table;
 		BigDecimal [] pi = {new BigDecimal(0.7,MathContext.DECIMAL32),new BigDecimal(0.2,MathContext.DECIMAL32),new BigDecimal(.1)};
-		String x[] ={"Scan_Exp_Mal"};
+		String x[] ={"lbl-internal.20041004-1303.port001.dump"};
 
+		System.out.println("Starting learning");
 		for(int s = 0; s < x.length;s++){
 			int r = 0; 
-			PcapReader Good = new PcapReader("C:\\Users\\Lab User\\Desktop\\"+x[s] +".pcap");
-			Good.loop(12);
+			//PcapReader Good = new PcapReader("C:\\Users\\Lab User\\Desktop\\"+x[s] +".pcap");
+			PcapReader Good = new PcapReader("C:\\Users\\trae\\Downloads\\"+x[s] +".pcap");
+			Good.loop(2147483647);
 			orgTypes(Good.getPacketData());
 			Good.packetData=null;
 			Bot = reLoad(r);
@@ -76,7 +78,7 @@ public class machineLearning {
 				out.writeObject(Bot);
 				out.close();
 				fileOut.close();
-				System.out.println("Serialized data is saved in /tmp/employee.ser");
+				System.out.println("Serialized data is saved ");
 			}catch(IOException i)
 			{
 				i.printStackTrace();
@@ -108,7 +110,7 @@ public class machineLearning {
 				out.writeObject(Bot);
 				out.close();
 				fileOut.close();
-				System.out.println("Serialized data is saved in /tmp/employee.ser");
+				System.out.println("Serialized data is saved ");
 			}catch(IOException i)
 			{
 				i.printStackTrace();
@@ -148,7 +150,7 @@ public class machineLearning {
 				out.writeObject(Bot);
 				out.close();
 				fileOut.close();
-				System.out.println("Serialized data is saved in /tmp/employee.ser");
+				System.out.println("Serialized data is saved ");
 			}catch(IOException i)
 			{
 				i.printStackTrace();
@@ -180,7 +182,7 @@ public class machineLearning {
 				out.writeObject(Bot);
 				out.close();
 				fileOut.close();
-				System.out.println("Serialized data is saved in /tmp/employee.ser");
+				System.out.println("Serialized data is saved ");
 			}catch(IOException i)
 			{
 				i.printStackTrace();
@@ -214,7 +216,7 @@ public class machineLearning {
 				out.writeObject(Bot);
 				out.close();
 				fileOut.close();
-				System.out.println("Serialized data is saved in /tmp/employee.ser");
+				System.out.println("Serialized data is saved ");
 			}catch(IOException i)
 			{
 				i.printStackTrace();
@@ -222,7 +224,7 @@ public class machineLearning {
 
 
 		}
-
+		System.out.println("learning Complete");
 
 	}
 	public static void orgTypes(ArrayList<ArrayList<Object>>  arr) {		

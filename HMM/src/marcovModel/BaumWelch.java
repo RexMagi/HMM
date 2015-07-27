@@ -52,12 +52,12 @@ public class BaumWelch extends ForwardBackward {
 	public void init(){
 
 		alpha = new BigDecimal[Model.getNumStates()][trainingSet.size()];
-		//beta = new BigDecimal[Model.getNumStates()][trainingSet.size()];	
+		beta = new BigDecimal[Model.getNumStates()][trainingSet.size()];	
 
 		for(int i = 0;i < Model.getNumStates();i++)
 			for(int t = 0;t < trainingSet.size();t++){
 				alpha[i][t] = new BigDecimal(0.);
-				//	beta[i][t] = new BigDecimal(0.);
+					beta[i][t] = new BigDecimal(0.);
 
 			}		
 	}
