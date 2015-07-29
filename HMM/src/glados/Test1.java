@@ -17,21 +17,27 @@ import distributions.Observation;
 public class Test1 {
 
 	public static void main(String[] args) throws FileNotFoundException {
-		File data = new File("C:\\Users\\trae\\Desktop\\test.txt");
+		File data = new File("C:\\Users\\Lab User\\Desktop\\test.txt");
 		Scanner eyes = new Scanner(data);
 		ArrayList<Observation> book = new ArrayList<Observation>();
-		while(eyes.hasNext()){
+		int c = 0;
+		boolean test =true;
+		while(test/*eyes.hasNext()*/){
 			String temp = eyes.nextLine();
 			temp= temp.toLowerCase();
-			for(char x:temp.toCharArray())
+			for(char x:temp.toCharArray()){
+				c++;
+				if(c>=20)
+					test =false;
 				book.add(new Observation(x));
+			}	
+	
 		}
-
 		BigDecimal [][] a = {
-				{new BigDecimal(0.47468,MathContext.DECIMAL32),new BigDecimal(0.52532,MathContext.DECIMAL32)},
-				{new BigDecimal(0.51656,MathContext.DECIMAL32),new BigDecimal(0.48344,MathContext.DECIMAL32)}};
+				{new BigDecimal(0.47468),new BigDecimal(0.52532)},
+				{new BigDecimal(0.51656),new BigDecimal(0.48344)}};
 
-		BigDecimal [] pi = {new BigDecimal(0.51316,MathContext.DECIMAL32),new BigDecimal(0.48684,MathContext.DECIMAL32)};
+		BigDecimal [] pi = {new BigDecimal(0.51316),new BigDecimal(0.48684)};
 		HashMap<Observation,BigDecimal> Table = new HashMap<Observation,BigDecimal>();
 		ArrayList<Distribution> distributionSet = new ArrayList<Distribution>();
 		Table.put(new Observation('a'),BigDecimal.valueOf(0.03735));

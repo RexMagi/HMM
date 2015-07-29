@@ -24,61 +24,78 @@ public class Test2 {
 	public static ArrayList<Observation> portSrcArr = new ArrayList<Observation>();
 
 	public static void main(String[] args) throws IOException {
-		String fileName = "EXPLOIT_MS_Office_Outlook_Recipient_Control_(ole32.dll)_Denial_of_Service_Exploit_EvilFingers";
+		String fileName = "SCAN_nmap_WINDOW_SCAN";
 		//PcapReader read = new PcapReader("C:\\Users\\Lab User\\Desktop\\"+fileName+".pcap");
-		PcapReader read = new PcapReader("C:\\Users\\trae\\Google Drive\\Cybersecurity - FIU 2015\\"+fileName+".pcap");
+		PcapReader read = new PcapReader("C:\\Users\\Lab User\\Desktop\\"+fileName+".pcap");
 		//output = new FileWriter("C:\\Users\\Lab User\\Desktop\\"+fileName+".csv");
 		//write =  new BufferedWriter(output);
-		read.loop(2147483647);
+		read.loop(500);
 		orgTypes(read.getPacketData());
 		ArrayList<HMM> Bot = new ArrayList<>();
 		ArrayList<Boolean> tally = new ArrayList<>();
 		BaumWelch inf;
-	
-		  for(int s = 0; s < 5;s++)
+	int count = 0;
+		  for(int s = 0; s < 4;s++)
 			Bot.add(reLoad(s));
-			
-		int start = 0, end = 5;
-		while(end != dstArr.size()){
-			
-			inf= new BaumWelch(new ArrayList<Observation>(dstArr.subList(start, end)),Bot.get(0));
-			tally.add(inf.inferance()>=.60);
+			int s = 10;
+		int start = 0, end = s;
+		System.out.println(dstArr.size());
+		
+		while(end <= dstArr.size()){
+			 tally = new ArrayList<>();
 			inf= new BaumWelch(new ArrayList<Observation>(srcArr.subList(start, end)),Bot.get(0));
-			tally.add(inf.inferance()>=.60);
-			inf= new BaumWelch(new ArrayList<Observation>(tlArr.subList(start, end)),Bot.get(0));
-			tally.add(inf.inferance()>=.60);
-			inf= new BaumWelch(new ArrayList<Observation>(portSrcArr.subList(start, end)),Bot.get(0));
-			tally.add(inf.inferance()>=.60);
-			inf= new BaumWelch(new ArrayList<Observation>(portDstArr.subList(start, end)),Bot.get(0));
-			tally.add(inf.inferance()>=.60);
+			try{	
+				tally.add(inf.inferance()>=.60);
+				}catch(Exception e){
+					tally.add(false);
+				}
+				
+			inf= new BaumWelch(new ArrayList<Observation>(dstArr.subList(start, end)),Bot.get(1));
+			try{	
+				tally.add(inf.inferance()>=.60);
+				}catch(Exception e){
+					tally.add(false);
+				}
 			
+//			inf= new BaumWelch(new ArrayList<Observation>(tlArr.subList(start, end)),Bot.get(0));
+//			tally.add(inf.inferance()>=.60);
+			inf= new BaumWelch(new ArrayList<Observation>(portSrcArr.subList(start, end)),Bot.get(2));
+			try{	
+			tally.add(inf.inferance()>=.60);
+			}catch(Exception e){
+				tally.add(false);
+			}
+			inf= new BaumWelch(new ArrayList<Observation>(portDstArr.subList(start, end)),Bot.get(3));
+			try{	
+				tally.add(inf.inferance()>=.60);
+				}catch(Exception e){
+					tally.add(false);
+				}
 			
-			if(Collections.frequency(tally, true)>=3){
-			System.out.println("You are Entering the Danger Zone");
-				break;
+			if(Collections.frequency(tally, true)>=2){
+			count++;
 			}
 			
 			start = end;
-			end += 5;
+			end += s;
 			
 		}
-
+System.out.println(count);
 	}
 	
 	
-	public static void orgTypes(ArrayList<ArrayList<Object>>  arr) {		
+	public static void orgTypes(ArrayList<ArrayList<Integer>>  arr) {		
 
 		for (int i = 0; i < arr.size() ; i++) {
 			try{
-
-				dstArr.add(new Observation((Integer) arr.get(i).get(0)));
-				srcArr.add(new Observation((Integer) arr.get(i).get(1)));
+				dstArr.add(new Observation( arr.get(i).get(0)));
+				srcArr.add(new Observation( arr.get(i).get(1)));
 				tlArr.add(new Observation(
-						(int) arr.get(i).get(2)));
+						 arr.get(i).get(2)));
 				portDstArr.add(new Observation(
-						((Integer) arr.get(i).get(3)).intValue()));
+						( arr.get(i).get(3)).intValue()));
 				portSrcArr.add(new Observation (
-						((Integer) arr.get(i).get(4)).intValue()));
+						( arr.get(i).get(4)).intValue()));
 				
 			}catch(IndexOutOfBoundsException  e){
 
@@ -91,7 +108,7 @@ public class Test2 {
 	public static HMM reLoad(int x){
 		HMM temp = null;
 		try{
-			FileInputStream fileIn = new FileInputStream("HMM.5"+x+".txt");
+			FileInputStream fileIn = new FileInputStream("SCAN_merge"+x+".txt");
 			ObjectInputStream in = new ObjectInputStream(fileIn);
 			temp = (HMM) in.readObject();
 			in.close();
@@ -100,6 +117,8 @@ public class Test2 {
 		{
 			return temp;
 		}
+		
+	
 		return temp;
 
 	}

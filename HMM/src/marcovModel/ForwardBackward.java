@@ -10,22 +10,17 @@ import distributions.Observation;
 
 
 public class ForwardBackward implements Runnable  {
-	BigDecimal alpha[][];//should be set to [number of states][size of training set-1]
-	BigDecimal beta[][];//should be set to [number of states][size of training set-1]
-	BigDecimal gammaDiscrete[][];//should be set to [number of states][size of training set-1]
-	BigDecimal gammaContinuous[][][];
-	BigDecimal xi[][][];//should be set to [number of states][size of training set-1]
-	int job;
-	BigDecimal gammaSum[];
-	BigDecimal alphaTimesBeta[];
-	ArrayList<ArrayList<BigDecimal>> memoryArrAlpha;
-	ArrayList<ArrayList<BigDecimal>> memoryArrBeta;
-	ArrayList<ArrayList<BigDecimal>> memoryArrGamma;
-	ArrayList<Observation> trainingSet;//the set being iterated over
-	HMM Model;//the hidden markov model
-	BigDecimal c[];//the scaling coefficient used to scale the alpha and beta values when they might become to small 
-	BigDecimal logLikelyHood;//used to store how likely the given sequence is logged to improve scale 
-	int lastState;
+	 BigDecimal alpha[][];//should be set to [number of states][size of training set-1]
+	 BigDecimal beta[][];//should be set to [number of states][size of training set-1]
+	 BigDecimal gammaDiscrete[][];//should be set to [number of states][size of training set-1]
+	 BigDecimal gammaContinuous[][][];
+	 BigDecimal xi[][][];//should be set to [number of states][size of training set-1]
+	 int job;
+	 BigDecimal gammaSum[];
+	 BigDecimal alphaTimesBeta[];
+	 ArrayList<Observation> trainingSet;//the set being iterated over
+	 HMM Model;//the hidden markov model
+
 
 	public ForwardBackward(ArrayList<Observation> Observation, HMM model) {
 		this.trainingSet = Observation;
@@ -36,8 +31,6 @@ public class ForwardBackward implements Runnable  {
 		//loops through all states and caches alpha values
 		for(int t = 0;t < trainingSet.size() ;t++)
 			for(int i = 0;i < Model.getNumStates();i++)	{
-
-
 				if(t == 0){
 					//sets alpha at time 1 to pi for that state times the probability of
 					//y1 given state i
@@ -48,7 +41,7 @@ public class ForwardBackward implements Runnable  {
 				}else {	
 					BigDecimal temp = new BigDecimal(0);
 					for(int j = 0;j < Model.getNumStates();j++){
-						temp = temp.add(alpha[j][t-1].multiply(Model.getA(j,i),MathContext.DECIMAL128));
+						temp = temp.add(alpha[j][t-1].multiply(Model.getA(j,i)));
 					}
 					//sets alpha for state i at time x to  emission for state i 
 					//for observation x times the sum of the previous alpha in all states times the 
@@ -64,8 +57,11 @@ public class ForwardBackward implements Runnable  {
 //					System.out.println(alpha.length);
 //					System.out.println(alpha[i].length);
 //					System.out.println("------------------------");
+//					System.out.println(alpha[i][t]);
+//					System.out.println(trainingSet.get(t));
 					alpha[i][t] = Model.pdf(i,trainingSet.get(t)).multiply(
 							temp);
+					
 				}
 
 			} 
@@ -131,9 +127,10 @@ public class ForwardBackward implements Runnable  {
 		BigDecimal temp2 = new BigDecimal(0.);
 		//sums alpha time beta for all states given t
 		for(int x = 0;x < Model.getNumStates();x++){
+//		System.out.println(beta[x][t]);
 			temp2=temp2.add(alpha[x][t].multiply(beta[x][t]));
 		}
-		return temp.divide(temp2,MathContext.DECIMAL128);
+		return temp.divide(temp2,MathContext.DECIMAL32);
 	}
 
 	public BigDecimal gamma(int i){
@@ -203,31 +200,31 @@ public class ForwardBackward implements Runnable  {
 	}
 
 
-	public void alpha(Observation x){
-		ArrayList<BigDecimal> memAlphas = new ArrayList<BigDecimal>();
-		if (memoryArrAlpha == null) {
-			memoryArrAlpha = new ArrayList<ArrayList<BigDecimal>>();
-			//sets alpha at time 1 to pi for that state times the probability of
-			//y1 given state i
-			for (int i = 0; i < 3; i++) 
-				memAlphas.add( Model.getPi(i).multiply(Model.pdf(i,x)));
-		}
-		else {	
-			BigDecimal temp = new BigDecimal(0.);
-			for(int i = 0; i < 3; i++) {
-				for(int j = 0;j < Model.getNumStates();j++){
-					temp = temp.add(memAlphas.get(memAlphas.size() - 1)
-							.multiply(Model.getA(j,i)));
-				}
-				memAlphas.add( Model.pdf(i,x).multiply(temp));
-			}
-		}
-		memoryArrAlpha.add(memAlphas);
-	}
-
-	public ArrayList<BigDecimal> getLastMemArr() {
-		return memoryArrAlpha.get(memoryArrAlpha.size() - 1);
-	}
+//	public void alpha(Observation x){
+//		ArrayList<BigDecimal> memAlphas = new ArrayList<BigDecimal>();
+//		if (memoryArrAlpha == null) {
+//			memoryArrAlpha = new ArrayList<ArrayList<BigDecimal>>();
+//			//sets alpha at time 1 to pi for that state times the probability of
+//			//y1 given state i
+//			for (int i = 0; i < 3; i++) 
+//				memAlphas.add( Model.getPi(i).multiply(Model.pdf(i,x)));
+//		}
+//		else {	
+//			BigDecimal temp = new BigDecimal(0.);
+//			for(int i = 0; i < 3; i++) {
+//				for(int j = 0;j < Model.getNumStates();j++){
+//					temp = temp.add(memAlphas.get(memAlphas.size() - 1)
+//							.multiply(Model.getA(j,i)));
+//				}
+//				memAlphas.add( Model.pdf(i,x).multiply(temp));
+//			}
+//		}
+//		memoryArrAlpha.add(memAlphas);
+//	}
+//
+//	public ArrayList<BigDecimal> getLastMemArr() {
+//		return memoryArrAlpha.get(memoryArrAlpha.size() - 1);
+//	}
 
 	@Override
 	public void run() {

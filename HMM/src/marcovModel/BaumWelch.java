@@ -16,11 +16,11 @@ import distributions.Observation;
 
 
 public class BaumWelch extends ForwardBackward {
-	BigDecimal[] sumA = new BigDecimal[Model.getNumStates()];//hold the total probability of going from state i to j used to average so that all sets sum to one
-	BigDecimal[] sumB = new BigDecimal[Model.getNumStates()];//holds the total probability of observing all the symbols used to average so that all sets sum to one
-	BigDecimal ttrans[][];
-	ArrayList<Distribution> b;
-	static int q = 0;
+	 BigDecimal[] sumA = new BigDecimal[Model.getNumStates()];//hold the total probability of going from state i to j used to average so that all sets sum to one
+	 BigDecimal[] sumB = new BigDecimal[Model.getNumStates()];//holds the total probability of observing all the symbols used to average so that all sets sum to one
+	 BigDecimal ttrans[][];
+	 ArrayList <Distribution> b;
+	 static int q = 0;
 	PrintWriter states;
 	PrintWriter LikelyHood;
 
@@ -35,7 +35,7 @@ public class BaumWelch extends ForwardBackward {
 		q++;
 
 		try {
-			states = new PrintWriter("StatesSM"+q+".txt", "UTF-8");
+			states = new PrintWriter("StatesT"+q+".txt", "UTF-8");
 		} catch (FileNotFoundException | UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
@@ -57,7 +57,7 @@ public class BaumWelch extends ForwardBackward {
 		for(int i = 0;i < Model.getNumStates();i++)
 			for(int t = 0;t < trainingSet.size();t++){
 				alpha[i][t] = new BigDecimal(0.);
-					beta[i][t] = new BigDecimal(0.);
+				beta[i][t] = new BigDecimal(0.);
 
 			}		
 	}
@@ -88,12 +88,12 @@ public class BaumWelch extends ForwardBackward {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		for(int t = 0; t < trainingSet.size(); t++){
 			risk = new BigDecimal(0);
 			for (int i = 0;i < Model.getNumStates(); i++)
 				risk = risk.add(gamma(i,t)).multiply(BigDecimal.valueOf(i/2.));
-			if(risk.compareTo(BigDecimal.valueOf(.75)) == 1)
+			if(risk.compareTo(BigDecimal.valueOf(.5)) == 1)
 				tally++;
 		}
 		return tally/this.trainingSet.size();
@@ -200,8 +200,6 @@ public class BaumWelch extends ForwardBackward {
 		b = new ArrayList<Distribution>();//holds the temporary emission functions
 		//sets pi for all states to the probability of observing the first element in the training sequence 
 		//initializes the normalizing coefficient for all states 
-		Thread emit = new Thread(this);
-		Thread trans = new Thread(this);
 		for(int x = 0;x < Model.getNumStates();x++ ){
 			tpi[x] =this.gammaDiscrete[x][0];
 			sumA[x] = new BigDecimal(0);
@@ -210,6 +208,8 @@ public class BaumWelch extends ForwardBackward {
 		//updates the transition matrix
 
 		job = 4;
+
+		Thread trans = new Thread(this);
 
 		trans.start();
 		try {
@@ -222,6 +222,8 @@ public class BaumWelch extends ForwardBackward {
 		//updates the transition matrix 
 		job = 5;
 
+		Thread emit = new Thread(this);
+
 		emit.start();
 		try {
 			Thread.sleep(200);
@@ -229,20 +231,7 @@ public class BaumWelch extends ForwardBackward {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		try {
-			trans.join();
-			emit.join();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		try {
-			trans.join();
-			emit.join();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+
 		Model.setPi(tpi);
 		Model.setA(ttrans);
 		Model.setB(b);
@@ -282,8 +271,6 @@ public class BaumWelch extends ForwardBackward {
 
 	public void learn(int itr){
 		for(int x = 0;x < itr; x++){
-
-			logLikelyHood = new BigDecimal(0);
 			alpha = new BigDecimal[Model.getNumStates()][trainingSet.size()];
 			beta = new BigDecimal[Model.getNumStates()][trainingSet.size()];	
 			gammaSum = new BigDecimal[Model.getNumStates()];
@@ -291,10 +278,7 @@ public class BaumWelch extends ForwardBackward {
 			gammaContinuous =  new BigDecimal[Model.getNumStates()][trainingSet.size()][Model.getNumMixtureComponents()];
 			xi = new BigDecimal[Model.getNumStates()][Model.getNumStates()][trainingSet.size()];
 			alphaTimesBeta  = new BigDecimal[trainingSet.size()];
-			Thread forward = new Thread(this);
-			Thread back = new Thread(this);
-			Thread gamma = new Thread(this);
-			Thread xiThread = new Thread(this);
+
 			for(int i = 0;i < Model.getNumStates();i++)
 				for(int t = 0;t < trainingSet.size();t++){
 					alpha[i][t] = new BigDecimal(0.);
@@ -305,19 +289,21 @@ public class BaumWelch extends ForwardBackward {
 
 			job = 0;
 
+			Thread forward = new Thread(this);
+
 			forward.start();
 			try {
-				Thread.sleep(1);
+				Thread.sleep(200);
 			} catch (InterruptedException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 			job = 1;
-
+			Thread back = new Thread(this);
 			back.start();
 
 			try {
-				Thread.sleep(1);
+				Thread.sleep(200);
 			} catch (InterruptedException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -333,6 +319,7 @@ public class BaumWelch extends ForwardBackward {
 
 			job = 2;
 			denomSum();
+			Thread gamma = new Thread(this);
 			gamma.start();
 			try {
 				Thread.sleep(200);
@@ -342,10 +329,12 @@ public class BaumWelch extends ForwardBackward {
 			}
 			job = 3;
 
-			xiThread.start();
+			Thread xi = new Thread(this);
+			xi.start();
+
 			try {
 				gamma.join();
-				xiThread.join();
+				xi.join();
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -359,9 +348,9 @@ public class BaumWelch extends ForwardBackward {
 
 			//LikelyHood.println(((logLikelyHood.doubleValue())) );
 			states.println(Model);
-			//System.out.println(Model);
+			System.out.println(Model);
 		}
-
+		states.flush();
 		states.close();
 	}
 

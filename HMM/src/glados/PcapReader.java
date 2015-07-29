@@ -23,12 +23,12 @@ public class PcapReader implements JPacketHandler<StringBuilder>{
 	final Udp udp = new Udp();
 	final Ip4 ipv4 = new Ip4();
 	final Arp arp = new Arp();
-	
+
 	final Ethernet eth = new Ethernet();
 	public int count = 0;
 	final Ip6 ipv6 = new Ip6();	
 	final StringBuilder errbuf = new StringBuilder();// error buffer
-	ArrayList<ArrayList<Object>> packetData= new ArrayList<>() ;
+	ArrayList<ArrayList<Integer>> packetData= new ArrayList<>() ;
 	HashMap<Integer, Integer> portMap = new HashMap<Integer, Integer>();
 
 	//takes in a file and opens a file reader stream from pcap manipulator
@@ -245,7 +245,7 @@ public class PcapReader implements JPacketHandler<StringBuilder>{
 	}
 	@Override
 	public void nextPacket(JPacket packet, StringBuilder errbuf) {
-		ArrayList<Object> pckt = new ArrayList<Object>() ;
+		ArrayList<Integer> pckt = new ArrayList<>() ;
 
 		/* 
 		 * Here we receive 1 packet at a time from the capture file. We are 
@@ -255,12 +255,12 @@ public class PcapReader implements JPacketHandler<StringBuilder>{
 		 * then get that header (peer header definition instance with memory in 
 		 * the packet) in 2 separate steps. 
 		 */  
-//		System.out.print("Icmp:");
-//		System.out.println(packet.hasHeader(Icmp.ID));
-//		System.out.println(packet.hasHeader(Rip.ID));
-//		System.out.print("IPv4:");
-//		System.out.println(packet.hasHeader(Ip4.ID));
-//		System.out.println();
+		//		System.out.print("Icmp:");
+		//		System.out.println(packet.hasHeader(Icmp.ID));
+		//		System.out.println(packet.hasHeader(Rip.ID));
+		//		System.out.print("IPv4:");
+		//		System.out.println(packet.hasHeader(Ip4.ID));
+		//		System.out.println();
 		if (packet.hasHeader(Ip4.ID)) {  
 			/* 
 			 * Now get our tcp header definition (accessor) peered with actual 
@@ -287,76 +287,76 @@ public class PcapReader implements JPacketHandler<StringBuilder>{
 				pckt.add(1);//private
 			else
 				pckt.add(2);//public
-		
-		
+
+
 			pckt.add(new Integer(eth.getPayloadLength())); 
 			Integer temp;
-			
+
 			if(packet.hasHeader(Tcp.ID)){
-			
-			try{
-			//	System.out.println(tcp.destination());
-			 temp = portMap.get(tcp.destination());
-			 
-			if (temp == null)
-				pckt.add(2);
-			else 
-				pckt.add(temp);
-			}catch(NullPointerException e){
-				
-				pckt.add(2);
-			}
-			
-			try{
-				//System.out.println(tcp.source());
-			temp= portMap.get(tcp.source());
-			
-			if (temp == null)
-				pckt.add(2);
-			else 
-				pckt.add(temp);
-			}catch(NullPointerException e){
-				
-				pckt.add(2);
-			}}
-			
-			 if(packet.hasHeader(Udp.ID)){
-				
+
 				try{
-				//	System.out.println(tcp.destination());
-				 temp = portMap.get(udp.destination());
-				 
-				if (temp == null)
-					pckt.add(2);
-				else 
-					pckt.add(temp);
+					//	System.out.println(tcp.destination());
+					temp = portMap.get(tcp.destination());
+
+					if (temp == null)
+						pckt.add(2);
+					else 
+						pckt.add(temp);
 				}catch(NullPointerException e){
-					
+
 					pckt.add(2);
 				}
-				
+
 				try{
 					//System.out.println(tcp.source());
-				temp= portMap.get(udp.source());
-				
-				if (temp == null)
-					pckt.add(2);
-				else 
-					pckt.add(temp);
+					temp= portMap.get(tcp.source());
+
+					if (temp == null)
+						pckt.add(2);
+					else 
+						pckt.add(temp);
 				}catch(NullPointerException e){
-					
+
 					pckt.add(2);
 				}}
-			
-					if(pckt.size() == 3){
-						temp = 3;
+
+			if(packet.hasHeader(Udp.ID)){
+
+				try{
+					//	System.out.println(tcp.destination());
+					temp = portMap.get(udp.destination());
+
+					if (temp == null)
+						pckt.add(2);
+					else 
 						pckt.add(temp);
+				}catch(NullPointerException e){
+
+					pckt.add(2);
+				}
+
+				try{
+					//System.out.println(tcp.source());
+					temp= portMap.get(udp.source());
+
+					if (temp == null)
+						pckt.add(2);
+					else 
 						pckt.add(temp);
-					}
-				
+				}catch(NullPointerException e){
+
+					pckt.add(2);
+				}}
+
+			if(pckt.size() == 3){
+				temp = 3;
+				pckt.add(temp);
+				pckt.add(temp);
+			}
+
 			packetData.add(pckt);
 		}
-		
+
 	}
 	/**
 	  @return the fileName
@@ -370,10 +370,10 @@ public class PcapReader implements JPacketHandler<StringBuilder>{
 	public void setFileName(String fileName) {
 		this.fileName = fileName;
 	}
-	public ArrayList<ArrayList<Object>> getPacketData() {
+	public ArrayList<ArrayList<Integer>> getPacketData() {
 		return packetData;
 	}
-	public void setPacketData(ArrayList<ArrayList<Object>> packetData) {
+	public void setPacketData(ArrayList<ArrayList<Integer>> packetData) {
 		this.packetData = packetData;
 	}
 

@@ -13,7 +13,7 @@ public class DataCollection {
 	
 	
 	public static void main(String[] args) throws IOException {
-		String fileName = "rob";
+		String fileName = "SCAN_merge";
 		 PcapReader read = new PcapReader("C:\\Users\\Lab User\\Desktop\\"+fileName+".pcap");
 		output = new FileWriter("C:\\Users\\Lab User\\Desktop\\"+fileName+".csv");
 		write =  new BufferedWriter(output);
@@ -37,9 +37,9 @@ public class DataCollection {
 		System.out.println(read.count);
 	}
 	
-	public static void orgTypes(ArrayList<ArrayList<Object>>  arr) throws IOException {
+	public static void orgTypes(ArrayList<ArrayList<Integer>>  arr) throws IOException {
+		
 		for (int i = 0; i < arr.size() ; i++) {
-			
 			write.write(((Integer) arr.get(i).get(0)).toString());
 			write.write(",");
 			write.write(((Integer) arr.get(i).get(1)).toString());

@@ -121,7 +121,7 @@ public class HMM implements java.io.Serializable{
 	public void normalize(BigDecimal[] sumA, BigDecimal[] sumB) {
 		for(int i = 0; i < numStates;i++)
 			for(int j=0;j<numStates;j++){
-				a[i][j]=a[i][j].divide(sumA[i],MathContext.DECIMAL64);
+				a[i][j] = a[i][j].divide(sumA[i],MathContext.DECIMAL64);
 			}
 		for(int i=0;i < numStates;i++)
 			for(Distribution x:b){
